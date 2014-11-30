@@ -31,18 +31,18 @@ router.get('/', function(req, res) {
 // 	console.log('Something is happening.');
 // 	next(); // make sure we go to the next routes and don't stop here
 // });
-// on routes that end in /bears
+// on routes that end in /users
 // ----------------------------------------------------
 router.route('/users')
 
-	// create a bear (accessed at POST http://localhost:8080/api/bears)
+	// create a user (accessed at POST http://localhost:8080/api/users)
 	.post(function(req, res) {
 		
-		var myUser = new MyUser(); 		// create a new instance of the Bear model
-		myUser.firstname = req.body.firstname;  // set the bears name (comes from the request)
+		var myUser = new MyUser(); 		// create a new instance of the user model
+		myUser.firstname = req.body.firstname;  // set the users name (comes from the request)
 		myUser.lastname = req.body.lastname;
 		myUser.email = req.body.email;
-		// save the bear and check for errors
+		// save the user and check for errors
 		myUser.save(function(err) {
 			if (err)
 				res.send(err);
@@ -61,11 +61,11 @@ router.route('/users')
 		});
 	});
 
-	// on routes that end in /bears/:bear_id
+	// on routes that end in /users/:user_id
 // ----------------------------------------------------
 router.route('/users/:user_id')
 
-	// get the bear with that id (accessed at GET http://localhost:8080/api/bears/:bear_id)
+	// get the user with that id (accessed at GET http://localhost:8080/api/users/:user_id)
 	.get(function(req, res) {
 		MyUser.findById(req.params.user_id, function(err, user) {
 			console.log('Get request for the user with the id: '+ req.params.user_id )
@@ -75,21 +75,21 @@ router.route('/users/:user_id')
 		});
 	})
 
-	// update the bear with this id (accessed at PUT http://localhost:8080/api/bears/:bear_id)
+	// update the user with this id (accessed at PUT http://localhost:8080/api/users/:user_id)
 	.put(function(req, res) {
 
-		// use our bear model to find the bear we want
+		// use our user model to find the user we want
 		MyUser.findById(req.params.user_id, function(err, user) {
 
 			if (err)
 				res.send(err);
 
-			user.firstname = req.body.firstname; 	// update the bears info
+			user.firstname = req.body.firstname; 	// update the users info
 			user.lastname = req.body.lastname;
 			user.email = req.body.email;
 			console.log("new attributes to be updated: " + user.firstname +" " + user.lastname );
 
-			// save the bear
+			// save the user
 			user.save(function(err) {
 				if (err)
 					res.send(err);
