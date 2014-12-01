@@ -20,6 +20,7 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose'); //call our database driver
 mongoose.connect('mongodb://slimane.agouram:03081990@ds053380.mongolab.com:53380/serveur_rd'); //mongolab NoSQL database
 var MyUser = require('./models/user.js');
+var Place = require('./models/place.js');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -208,13 +209,11 @@ router.route('/users/:user_id')
 
 		});
 				}
-//////////////////////////
-		
-	///////////////////////
+
 	})
 
 	.delete(function(req, res) {
-		if (!validateEmail) {
+		if (!validateEmail(req.params.user_id)) {
 			MyUser.remove({
 			_id: req.params.user_id
 		}, function(err, user) {
@@ -252,7 +251,63 @@ router.route('/users/:user_id')
 		
 	});
 
-//
+//////////////////////////////////////////////////////////////////////////////////
+router.route('/places')
+	.post(function(req, res) {
+
+			console.log("req.params %j", req.params);
+			console.log('req.body: %j', req.body);
+		var myPlace = new Place();
+		myPlace.user.email = req.body.user.email;  // set the users name (comes from the request)
+		myPlace.user.lat = req.body.user.lat;
+		myPlace.user.lng = req.body.user.lng;
+		myPlace.user.mode = req.body.user.mode;
+		myPlace.usersArray=req.body.usersArray;
+		console.log("Place object %j:", myPlace); 		// create a new instance of the user model
+
+		
+
+		// save the user and check for errors
+		myPlace.save(function(err) {
+			if (err)
+				res.send(err);
+			var response={id:""};
+			response.id = myPlace._id;
+			res.json(response);
+		});
+		
+	})
+
+	.delete(function(req,res) {
+		var key='';
+			console.log('deleting shit,req is, id: ' +req.body.id + ' and user :' + req.body.user.email);
+			Place.findById(req.body.id ,function(err,place){
+					console.log("found place: %j", place);
+					var index = place.usersArray.indexOf(req.body.user.email);
+					console.log("indes :"+ index);
+					place.usersArray.splice(index,1);
+					console.log("object result %j", place);
+					
+				
+			console.log("saving after deleting");
+			place.save(function(err) {
+			var response={success:"true",err:""};
+			if (err)
+			{
+				response.err = err;
+				response.success = "false";
+				res.json(response);
+			}
+
+			res.json(response);
+		});
+
+	});
+		});
+
+
+
+
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
