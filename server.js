@@ -180,9 +180,8 @@ router.route('/users/:user_id')
 	})
 
 	.delete(function(req, res) {
-		console.log("req.params: %j", req.params);
-		console.log('req.body: %j', req.body);
-		MyUser.remove({
+		if (!validateEmail) {
+			MyUser.remove({
 			_id: req.params.user_id
 		}, function(err, user) {
 			if (err)
@@ -190,6 +189,33 @@ router.route('/users/:user_id')
 
 			res.json({ message: 'Successfully deleted user !' });
 		});
+		}
+		else
+		{
+			var key='';
+			console.log('deleting by email');
+			MyUser.find({'email': req.params.user_id},function(err,user){
+				if(user.length>0)
+				{
+					key =user[0]._id;
+					MyUser.remove({
+						_id:key
+					},function(err,user){
+						if(err)
+							res.send(err);
+
+					res.json({message:'Successfully deleted user by email'});
+					});
+				}
+				else
+				{
+					res.json(404,'User not found by email');
+				}
+			})
+
+
+		}
+		
 	});
 
 //
