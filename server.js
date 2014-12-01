@@ -37,7 +37,8 @@ router.route('/users')
 
 	// create a user (accessed at POST http://localhost:8080/api/users)
 	.post(function(req, res) {
-		
+			console.log("req.params: %j", req.params);
+			console.log('req.body: %j', req.body);
 		var myUser = new MyUser(); 		// create a new instance of the user model
 		myUser.firstname = req.body.firstname;  // set the users name (comes from the request)
 		myUser.lastname = req.body.lastname;
@@ -53,6 +54,8 @@ router.route('/users')
 	})
 
 	.get(function(req, res) {
+		console.log("req.params: %j", req.params);
+			console.log('req.body: %j', req.body);
 		MyUser.find(function(err, users) {
 			if (err)
 				res.send(err);
@@ -61,25 +64,53 @@ router.route('/users')
 		});
 	});
 
+	//function to test if a string is an email, will be used for the get/put/ requests:
+	function validateEmail(email) { 
+    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+} ;
+
 	// on routes that end in /users/:user_id
 // ----------------------------------------------------
 router.route('/users/:user_id')
-
+		
 	// get the user with that id (accessed at GET http://localhost:8080/api/users/:user_id)
 	.get(function(req, res) {
+		console.log("req.params: %j", req.params);
+		console.log('req.body: %j', req.body);
+		console.log('test email: ' + validateEmail(req.params.user_id));
+		if(!validateEmail(req.params.user_id))
+		{
 		MyUser.findById(req.params.user_id, function(err, user) {
 			console.log('Get request for the user with the id: '+ req.params.user_id )
 			if (err)
 				res.send(err);
 			res.json(user);
 		});
+		}
+		else
+		{
+			MyUser.find({'email':req.params.user_id},function(err,user){
+					console.log('Get request for the user with the email: '+ req.params.user_id )
+			if (err)
+				res.send(err);
+			res.json(user);
+			});
+		}
 	})
 
 	// update the user with this id (accessed at PUT http://localhost:8080/api/users/:user_id)
 	.put(function(req, res) {
-
+			console.log("req.params: %j", req.params);
+			console.log('req.body: %j', req.body);
 		// use our user model to find the user we want
-		MyUser.findById(req.params.user_id, function(err, user) {
+				if(!validateEmail(req.params.user_id))
+				{
+					console.log("PUT REQUEST BY ID");
+
+			MyUser.findById(req.params.user_id, function(err, user) {
+			console.log('res.params: ' + req.params );
+			console.log('res.body: ' + req.body);
 
 			if (err)
 				res.send(err);
@@ -98,9 +129,59 @@ router.route('/users/:user_id')
 			});
 
 		});
+				}
+				else
+				{
+			console.log("PUT REQUEST BY Email");
+			MyUser.find({'email':req.params.user_id}, function(err, user) {
+			console.log('res.params: %j', req.params );
+			console.log('res.body: %j' ,req.body);
+
+			if (err)
+				res.send(err);
+
+			console.log("how many found? " + user.length );
+			if (user.length>0) {
+			////////
+			for (var i = user.length - 1; i >= 0; i--) {
+				user[i].firstname = req.body.firstname; 	// update the users info
+				user[i].lastname = req.body.lastname;
+				user[i].email = req.body.email;
+			};
+			// save the user
+			for (var i = user.length - 1; i >= 0; i--) {
+				user[i].save(function(err) {
+				if (err)
+					res.send(err);
+
+				res.json({ message: 'User updated!' });
+			});
+
+			};
+
+			///////////////if we didn't find no record, don't put the server on wait ... send empty response!
+			}
+			else
+			{
+				res.send(err);
+			}
+			// user.save(function(err) {
+			// 	if (err)
+			// 		res.send(err);
+
+			// 	res.json({ message: 'User updated!' });
+			// });
+
+		});
+				}
+//////////////////////////
+		
+	///////////////////////
 	})
 
 	.delete(function(req, res) {
+		console.log("req.params: %j", req.params);
+		console.log('req.body: %j', req.body);
 		MyUser.remove({
 			_id: req.params.user_id
 		}, function(err, user) {
@@ -111,7 +192,7 @@ router.route('/users/:user_id')
 		});
 	});
 
-
+//
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
