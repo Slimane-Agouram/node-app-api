@@ -12,7 +12,7 @@ run :
 
 	node server.js 
 
-make rest resuests :
+make rest requests :
 
 	http://localhost/8080/api/users ====>fetch all users or create new one 
 	http://localhost/8080/api/users/user_id ====> fetch particular user, modify it delete it ...
