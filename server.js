@@ -1,3 +1,15 @@
+
+// TODO Stuff
+// =============================================================================
+	//our api is still open, no authentication system has been installed, will be done later
+	//we must concretize all the internal js libraries for nodeJS managinf maps and stuff
+	//make sure that the backoffice is doing the accurate requests
+	// write methods to manage the history of places one user has visited.
+
+
+
+
+
 // BASE SETUP
 // =============================================================================
 
@@ -5,8 +17,8 @@
 var express    = require('express'); 		// call express
 var app        = express(); 				// define our app using express
 var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://slimane.agouram:03081990@ds053380.mongolab.com:53380/serveur_rd');
+var mongoose = require('mongoose'); //call our database driver
+mongoose.connect('mongodb://slimane.agouram:03081990@ds053380.mongolab.com:53380/serveur_rd'); //mongolab NoSQL database
 var MyUser = require('./models/user.js');
 
 // configure app to use bodyParser()
@@ -25,6 +37,19 @@ router.get('/', function(req, res) {
 	res.json({ message: 'hooray! welcome to our api!' });	
 });
 
+
+//TOOLS////////////////////////
+//function to test if a string is an email, will be used for the get/put/ requests since it's so much easier to fetch users by email
+	//rather than the ugly random id, we should though make sure that the email is unique, or a lot of shit will be going wrong...
+	function validateEmail(email) { 
+    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+} ;
+
+
+
+//END OF TOOLS///////////////////////////////
+
 // // more routes for our API will happen here
 // router.use(function(req,res,next){
 // // do logging
@@ -42,7 +67,16 @@ router.route('/users')
 		var myUser = new MyUser(); 		// create a new instance of the user model
 		myUser.firstname = req.body.firstname;  // set the users name (comes from the request)
 		myUser.lastname = req.body.lastname;
-		myUser.email = req.body.email;
+		if(req.body.email!= '' && req.body.email!= null && validateEmail(req.body.email))
+		{
+			myUser.email = req.body.email;
+		}
+		else
+		{
+			//res.send("updated properties bu not the email adress,since it does not seem to be correct...");
+			res.json(500,'Email is not valid, could not post the user');
+
+		}
 		// save the user and check for errors
 		myUser.save(function(err) {
 			if (err)
@@ -64,13 +98,10 @@ router.route('/users')
 		});
 	});
 
-	//function to test if a string is an email, will be used for the get/put/ requests:
-	function validateEmail(email) { 
-    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email);
-} ;
+	
 
 	// on routes that end in /users/:user_id
+	//user_id could be the id or the email, we should manage the 2 cases...
 // ----------------------------------------------------
 router.route('/users/:user_id')
 		
@@ -79,7 +110,7 @@ router.route('/users/:user_id')
 		console.log("req.params: %j", req.params);
 		console.log('req.body: %j', req.body);
 		console.log('test email: ' + validateEmail(req.params.user_id));
-		if(!validateEmail(req.params.user_id))
+		if(!validateEmail(req.params.user_id)) //if post param is not a mail, then fetch by id
 		{
 		MyUser.findById(req.params.user_id, function(err, user) {
 			console.log('Get request for the user with the id: '+ req.params.user_id )
@@ -88,7 +119,7 @@ router.route('/users/:user_id')
 			res.json(user);
 		});
 		}
-		else
+		else //if it is an email adress then fetch by email this time
 		{
 			MyUser.find({'email':req.params.user_id},function(err,user){
 					console.log('Get request for the user with the email: '+ req.params.user_id )
@@ -99,12 +130,15 @@ router.route('/users/:user_id')
 		}
 	})
 
+	//Warning: Model.find returns an array(if not found THEN an empty array) while findById returns an object or null, so we should be very careful of what we are modifying, again, no unique email means a lot of
+	//weird things will be going crazy... 
+
 	// update the user with this id (accessed at PUT http://localhost:8080/api/users/:user_id)
 	.put(function(req, res) {
 			console.log("req.params: %j", req.params);
 			console.log('req.body: %j', req.body);
 		// use our user model to find the user we want
-				if(!validateEmail(req.params.user_id))
+				if(!validateEmail(req.params.user_id)) //same goes here 
 				{
 					console.log("PUT REQUEST BY ID");
 
@@ -159,7 +193,7 @@ router.route('/users/:user_id')
 
 			};
 
-			///////////////if we didn't find no record, don't put the server on wait ... send empty response!
+			///////////////if we didn't find no record, don't put the server on wait ... send not found response!
 			}
 			else
 			{
