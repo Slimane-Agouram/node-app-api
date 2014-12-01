@@ -163,7 +163,7 @@ router.route('/users/:user_id')
 			}
 			else
 			{
-				res.send(err);
+				res.json(404,'User not found');
 			}
 			// user.save(function(err) {
 			// 	if (err)
