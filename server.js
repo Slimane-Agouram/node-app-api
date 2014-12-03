@@ -1,10 +1,11 @@
 
-// TODO Stuff
-// =============================================================================
-	//our api is still open, no authentication system has been installed, will be done later
-	//we must concretize all the internal js libraries for nodeJS managinf maps and stuff
-	//make sure that the backoffice is doing the accurate requests
-	// write methods to manage the history of places one user has visited.
+// // TODO Stuff
+// // =============================================================================
+// 	//our api is still open, no authentication system has been installed, will be done later
+// 	//we must concretize all the internal js libraries for nodeJS managinf maps and stuff
+// 	//make sure that the backoffice is doing the accurate requests
+// 	// write methods to manage the history of meetings one user has visited.
+
 
 
 
@@ -252,27 +253,49 @@ router.route('/users/:user_id')
 	});
 
 //////////////////////////////////////////////////////////////////////////////////
-router.route('/places')
+router.route('/rendezvous')
 	.post(function(req, res) {
 
 			console.log("req.params %j", req.params);
 			console.log('req.body: %j', req.body);
-		var myPlace = new Place();
-		myPlace.user.email = req.body.user.email;  // set the users name (comes from the request)
-		myPlace.user.lat = req.body.user.lat;
-		myPlace.user.lng = req.body.user.lng;
-		myPlace.user.mode = req.body.user.mode;
-		myPlace.usersArray=req.body.usersArray;
-		console.log("Place object %j:", myPlace); 		// create a new instance of the user model
+		var rendezVous = new Place();
+		rendezVous.user.creatorEmail = req.body.user.email;  // set the users name (comes from the request)
 
+		var user_creator ={
+				email: req.body.user.email,
+				lat:req.body.user.lat,
+				lng:req.body.user.lng,
+				mode:req.body.user.mode,
+				useTransports: req.body.user.useTransports,
+				state:"DK"
+			};
+			rendezVous.usersArray.push(user_creator);
+
+
+		
+		for (var i = req.body.usersArray.length - 1; i >= 0; i--) {
+			var user_temp = {
+				email: req.body.usersArray[i],
+				lat:0,
+				lng:0,
+				mode:'walk',
+				useTransports: true,
+				state:"DK"
+			};
+			rendezVous.usersArray.push(user_temp);
+		};
 		
 
 		// save the user and check for errors
-		myPlace.save(function(err) {
+		rendezVous.save(function(err) {
 			if (err)
+			{
+				console.log(err);
 				res.send(err);
+
+			}
 			var response={id:""};
-			response.id = myPlace._id;
+			response.id = rendezVous._id;
 			res.json(response);
 		});
 		
@@ -280,27 +303,51 @@ router.route('/places')
 
 	.delete(function(req,res) {
 		var key='';
-			console.log('deleting shit,req is, id: ' +req.body.id + ' and user :' + req.body.user.email);
-			Place.findById(req.body.id ,function(err,place){
-					console.log("found place: %j", place);
-					var index = place.usersArray.indexOf(req.body.user.email);
-					console.log("indes :"+ index);
-					place.usersArray.splice(index,1);
-					console.log("object result %j", place);
-					
-				
-			console.log("saving after deleting");
-			place.save(function(err) {
-			var response={success:"true",err:""};
-			if (err)
-			{
-				response.err = err;
-				response.success = "false";
-				res.json(response);
-			}
+			Place.findById(req.body.id ,function(err,meeting){
+					//var index = meeting.usersArray.indexOf(req.body.user.email);
+					var index = -1;
+					var response={success:"true",err:""};
 
-			res.json(response);
-		});
+					if (meeting==null) {
+						response.success="false";
+						response.err="meeting not found using the given ID";
+						res.json(response);
+					}
+					else
+					{
+						for (var i = meeting.usersArray.length - 1; i >= 0; i--) {
+						if(meeting.usersArray[i].email== req.body.user.email)
+						{
+							index = i;
+						}
+					};
+
+					if (index==-1) {
+						response.success="false";
+						response.err="user not found in pointed meeting";
+						res.json(response);
+					}
+					else
+					{
+						meeting.usersArray.splice(index,1);
+						console.log("object result after deletion %j", meeting);
+						meeting.save(function(err) {
+						if (err)
+						{
+							response.err = err;
+							response.success = "false";
+							res.json(response);
+						}
+
+						res.json(response);
+						});
+					}
+					}
+
+					
+							
+			
+					
 
 	});
 		});
