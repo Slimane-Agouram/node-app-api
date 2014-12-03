@@ -201,13 +201,7 @@ router.route('/users/:user_id')
 			{
 				res.json(404,'User not found');
 			}
-			// user.save(function(err) {
-			// 	if (err)
-			// 		res.send(err);
-
-			// 	res.json({ message: 'User updated!' });
-			// });
-
+			
 		});
 				}
 
@@ -350,7 +344,56 @@ router.route('/rendezvous')
 					
 
 	});
-		});
+		})
+
+	.put(function(req, res) {
+			console.log('req.body: %j', req.body);
+			
+			Place.findById(req.body.id,function(err,meeting)
+				{
+					var response={success:"true", err:""};
+					if(meeting!=null)
+					{
+						var index = -1;
+						for (var i = meeting.usersArray.length - 1; i >= 0; i--) {
+							if (meeting.usersArray[i].email == req.body.user.email) {
+								index = i;
+								meeting.usersArray[i].lat = req.body.user.lat;
+								meeting.usersArray[i].lng = req.body.user.lng;
+								meeting.usersArray[i].state = req.body.user.state;
+							};
+						};
+
+						if (index==-1) {
+							response.success="false";
+							response.err = "User not found in the given meeting, are you sure it has not being already deleted?";
+							res.json(response);
+						}
+						else
+						{
+						meeting.save(function(err) {
+						if (err)
+						{
+							response.err = err;
+							response.success = "false";
+							res.json(response);
+						}
+
+						res.json(response);
+						});
+						}
+					}
+					else
+					{
+						response.success="false";
+						response.err = "Meeting not found with the given ID";
+						res.json(response);
+					}
+
+				});
+
+
+	});
 
 
 

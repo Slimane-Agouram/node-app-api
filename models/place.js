@@ -24,7 +24,7 @@ var Place = new Schema({
 	lng:{type:Number,required:true, default:0,required:true},
 	mode:  {type:String, default:'walk',enum:['walk', 'drive']},
 	useTransports: {type: Boolean, default:true,required:true}, 
-	state:{type:String, required:true, default:"DK", enum:["Y","N","DK"]}
+	state:{type:String, required:true, default:"DK", enum:["Y","N","DK","AT"]}   //AT: Already There for those who arrived, we can use that to show how many people are laready there
 	}]
 });
 

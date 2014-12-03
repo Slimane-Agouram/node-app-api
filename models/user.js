@@ -4,11 +4,7 @@ var mongoose     = require('mongoose'); //call mongodb driver to create an accur
 var Schema       = mongoose.Schema; 
 
 
-//that is one fucked up NESTED Schema that still is not working well, haven't figured out why yet ... will be working on it.
-var Place = new Schema({ 
-	name:String, 
-	map: {points:[{id:String, lat:Number, lng:Number, adr:String}], edges: [{id:String, in:String, out: String,time:{type:String, t:Number}}]}
-});
+
 
 
 var MyUserSchema   = new Schema({
@@ -20,4 +16,3 @@ var MyUserSchema   = new Schema({
 });
 
 module.exports = mongoose.model('MyUser', MyUserSchema);
-//module.exports = mongoose.model('Place',Place);
