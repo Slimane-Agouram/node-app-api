@@ -393,6 +393,17 @@ router.route('/rendezvous')
 				});
 
 
+	})
+
+.get(function(req, res) {
+		console.log("req.params: %j", req.params);
+			console.log('req.body: %j', req.body);
+		Place.find(function(err, meetings) {
+			if (err)
+				res.send(err);
+
+			res.json(meetings);
+		});
 	});
 
 
