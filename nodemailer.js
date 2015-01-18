@@ -1,5 +1,5 @@
 var path           = require('path')
-  , templatesDir   = path.resolve(__dirname, '..', 'node-app-api/templates')
+  , templatesDir   = path.resolve(__dirname, '.', 'templates')
   , emailTemplates = require('email-templates')
   , nodemailer     = require('nodemailer');
 
