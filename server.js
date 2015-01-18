@@ -23,6 +23,14 @@ mongoose.connect('mongodb://slimane.agouram:03081990@ds053380.mongolab.com:53380
 var MyUser = require('./models/user.js');
 var Place = require('./models/place.js');
 var nodemailer = require('./nodemailer.js');
+var jquery = require('./rechercheDePointDeRencontre/jquery-2.1.1.min.js');
+var taffy = require('./rechercheDePointDeRencontre/taffydb-master/taffy.js');
+var jquery = require('./rechercheDePointDeRencontre/geo.js');
+var meetpointFinder = require('./rechercheDePointDeRencontre/meetPointFinder.js')
+var map = require('./rechercheDePointDeRencontre/map.js');
+
+
+
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -73,6 +81,37 @@ router.route('/users')
 		if(req.body.email!= '' && req.body.email!= null && validateEmail(req.body.email))
 		{
 			myUser.email = req.body.email;
+			myUser.password = req.body.password;
+			MyUser.find({email:myUser.email},function(err,user){
+				if (err)
+					res.send(err);
+
+				if (user.length!=0) {
+					res.json(500,'User already exists, could not post the user');
+
+				}else{
+
+					myUser.save(function(err) {
+			if (err)
+				res.send(err);
+
+			res.json({ success:"true", message: 'User created!' });
+			var users_to_mail = [{
+								email: myUser.email,
+								password: myUser.password,
+								 name: {
+				         			 first: myUser.firstname,
+				          			last: myUser.lastname},
+				        		}];
+							
+							var template ='signup-email'; 
+							var subject = 'bienvenue';
+							var fromWho = 'From the APP';
+							nodemailer.sendMails(users_to_mail,template,subject,fromWho);
+
+		});
+				};
+		});
 		}
 		else
 		{
@@ -81,12 +120,9 @@ router.route('/users')
 
 		}
 		// save the user and check for errors
-		myUser.save(function(err) {
-			if (err)
-				res.send(err);
 
-			res.json({ message: 'User created!' });
-		});
+
+		
 		
 	})
 
@@ -155,6 +191,7 @@ router.route('/users/:user_id')
 			user.firstname = req.body.firstname; 	// update the users info
 			user.lastname = req.body.lastname;
 			user.email = req.body.email;
+			user.password = req.body.password;
 			console.log("new attributes to be updated: " + user.firstname +" " + user.lastname );
 
 			// save the user
@@ -184,6 +221,7 @@ router.route('/users/:user_id')
 				user[i].firstname = req.body.firstname; 	// update the users info
 				user[i].lastname = req.body.lastname;
 				user[i].email = req.body.email;
+				user[i].password = req.body.password;
 			};
 			// save the user
 			for (var i = user.length - 1; i >= 0; i--) {
@@ -191,7 +229,7 @@ router.route('/users/:user_id')
 				if (err)
 					res.send(err);
 
-				res.json({ message: 'User updated!' });
+				res.json({success:"true", message: 'User updated!' });
 			});
 
 			};
@@ -202,7 +240,23 @@ router.route('/users/:user_id')
 			{
 				res.json(404,'User not found');
 			}
-			
+				
+			var users_to_mail = [{
+								email: user[0].email,
+								password: user[0].password,
+								 name: {
+				         			 first: user[0].firstname,
+				          			last: user[0].lastname},
+				        		}];
+							
+							var template ='change-info-mail'; 
+							var subject = 'changement de données utilisateur';
+							var fromWho = 'From the APP';
+							nodemailer.sendMails(users_to_mail,template,subject,fromWho);
+
+
+
+
 		});
 				}
 
@@ -512,8 +566,10 @@ router.route('/rendezvous')
 router.route('/meetingpoint')
 	.post(function(req,res){
 		console.log("post request to get meeting point");
-		console.log("req.params: %j", req.params);
-			console.log('req.body: %j', req.body);
+			//var mpf = new MeetPointFinder ();
+			console.log("Meetpointfinder executed");
+		//console.log("req.params: %j", req.params);
+			//console.log('req.body: %j', req.body);
 			var rendezVous = new Place();
 			if(req.body.id!=null && req.body.id !=NaN)
 			{
