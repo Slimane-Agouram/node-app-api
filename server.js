@@ -270,9 +270,7 @@ router.route('/rendezvous')
 							if(meeting.usersArray[i].email == req.body.user.email)
 							{
 								user_exists = true; 
-								// response.success ='false';
-								// response.err = 'this user already is in the requested Meeting, will not add twice';
-								// res.json(response);
+								break;
 							}
 						};
 
@@ -301,6 +299,21 @@ router.route('/rendezvous')
 								}
 									res.json(response);
 							});
+
+							console.log("trying to send mails");
+							var users_to_mail = [{
+								email: user_to_add.email,
+								 name: {
+				         			 first: 'test_first',
+				          			last: 'test_last'},
+				        		creator:{
+				        				email: meeting.user.creatorEmail
+				        				}}];
+							
+							var template ='welcome-email'; 
+							var subject = 'bienvenue';
+							var fromWho = 'From the APP';
+							nodemailer.sendMails(users_to_mail,template,subject,fromWho);
 
 						};
 
