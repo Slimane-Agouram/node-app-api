@@ -254,6 +254,7 @@ router.route('/rendezvous')
 				var rendezVous = new Place();
 		if(req.body.id!=null && req.body.id!=NaN)
 		{
+			var user_exists = false;
 			Place.findById(req.body.id ,function(err,meeting){
 
 					var response={success:"true",err:""};
@@ -266,33 +267,44 @@ router.route('/rendezvous')
 					else
 					{
 						for (var i = meeting.usersArray.length - 1; i >= 0; i--) {
-							if(meeting.usersArray[i].email = req.body.user.email)
+							if(meeting.usersArray[i].email == req.body.user.email)
 							{
-								response.success ='false';
-								response.err = 'this user already is in the requested Meeting, will not add twice';
-								res.json(response);
+								user_exists = true; 
+								// response.success ='false';
+								// response.err = 'this user already is in the requested Meeting, will not add twice';
+								// res.json(response);
 							}
 						};
-						var user_to_add = {
-								email: req.body.user.email,
-								lat:req.body.user.lat,
-								lng:req.body.user.lng,
-								mode:req.body.user.mode,
-								useTransports: req.body.user.useTransports,
+
+					if (user_exists) {
+						response.success ='false';
+						response.err = 'this user already is in the requested Meeting, will not add twice';
+						res.json(response);
+					} 
+						else{
+									var user_to_add = {
+										email: req.body.user.email,
+										lat:req.body.user.lat,
+										lng:req.body.user.lng,
+										mode:req.body.user.mode,
+										useTransports: req.body.user.useTransports,
+								};
+
+							meeting.usersArray.push(user_to_add);
+							meeting.save(function(err){
+
+								if (err)
+								{
+									response.err = err;
+									response.success = "false";
+									res.json(response);
+								}
+									res.json(response);
+							});
+
 						};
 
-					meeting.usersArray.push(user_to_add);
-					meeting.save(function(err){
-
-						if (err)
-						{
-							response.err = err;
-							response.success = "false";
-							res.json(response);
-						}
-							res.json(response);
-					});
-
+						
 
 						}
 					});
@@ -490,6 +502,65 @@ router.route('/meetingpoint')
 		console.log("req.params: %j", req.params);
 			console.log('req.body: %j', req.body);
 			var rendezVous = new Place();
+			if(req.body.id!=null && req.body.id !=NaN)
+			{
+				Place.findById(req.body.id ,function(err,meeting){
+					if(meeting == null)
+					{
+						console.log("meeting non retrouvé");
+						var response_null = {success:"false", err:"Requested ID does not match any meeting "};
+						res.json(response_null);
+					}
+					else
+					{
+						console.log("meeting retrouvé");
+						var new_format_for_meeting = {
+							id:meeting._id,
+							users: meeting.usersArray,
+							point:{
+								lat:0,
+								lng:0,
+								adress:""
+							}
+						};
+						
+
+						res.json(new_format_for_meeting);
+					}
+				});
+			}
+			else
+			{
+				Place.find({"usersArray.email":req.body.user.email
+					},function(err,meetings){
+
+					if(meetings.length==0)
+					{
+						console.log("No meeting found with this email adress");
+						var response_null = {success:"false", err:"No meeting found with this email adress "};
+						res.json(response_null);
+					}
+					else
+					{
+						console.log("longeur: " +meetings.length );
+						var new_array_to_return = [];
+						for (var i = meetings.length - 1; i >= 0; i--) {
+							var new_format_for_meeting = {
+							id:meetings._id,
+							users: meetings[i].usersArray,
+							point:{
+								lat:0,
+								lng:0,
+								adress:""
+							}
+						};
+						new_array_to_return.push(new_format_for_meeting);
+						};
+						res.json(new_array_to_return);
+					}
+
+			});
+			}
 
 
 
