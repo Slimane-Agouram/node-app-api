@@ -22,6 +22,7 @@ var mongoose = require('mongoose'); //call our database driver
 mongoose.connect('mongodb://slimane.agouram:03081990@ds053380.mongolab.com:53380/serveur_rd'); //mongolab NoSQL database
 var MyUser = require('./models/user.js');
 var Place = require('./models/place.js');
+var nodemailer = require('./nodemailer.js');
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -247,12 +248,62 @@ router.route('/users/:user_id')
 	});
 
 //////////////////////////////////////////////////////////////////////////////////
+//Create new meeting with new creatorEmail and new list of new mails of joining members
 router.route('/rendezvous')
 	.post(function(req, res) {
+				var rendezVous = new Place();
+		if(req.body.id!=null && req.body.id!=NaN)
+		{
+			Place.findById(req.body.id ,function(err,meeting){
 
+					var response={success:"true",err:""};
+
+					if (meeting==null) {
+						response.success="false";
+						response.err="meeting not found using the given ID";
+						res.json(response);
+					}
+					else
+					{
+						for (var i = meeting.usersArray.length - 1; i >= 0; i--) {
+							if(meeting.usersArray[i].email = req.body.user.email)
+							{
+								response.success ='false';
+								response.err = 'this user already is in the requested Meeting, will not add twice';
+								res.json(response);
+							}
+						};
+						var user_to_add = {
+								email: req.body.user.email,
+								lat:req.body.user.lat,
+								lng:req.body.user.lng,
+								mode:req.body.user.mode,
+								useTransports: req.body.user.useTransports,
+						};
+
+					meeting.usersArray.push(user_to_add);
+					meeting.save(function(err){
+
+						if (err)
+						{
+							response.err = err;
+							response.success = "false";
+							res.json(response);
+						}
+							res.json(response);
+					});
+
+
+						}
+					});
+
+			
+		}
+		else
+		{
+			console.log("post request: create new meeting");
 			console.log("req.params %j", req.params);
 			console.log('req.body: %j', req.body);
-		var rendezVous = new Place();
 		rendezVous.user.creatorEmail = req.body.user.email;  // set the users name (comes from the request)
 
 		var user_creator ={
@@ -266,7 +317,6 @@ router.route('/rendezvous')
 			rendezVous.usersArray.push(user_creator);
 
 
-		
 		for (var i = req.body.usersArray.length - 1; i >= 0; i--) {
 			var user_temp = {
 				email: req.body.usersArray[i],
@@ -288,16 +338,42 @@ router.route('/rendezvous')
 				res.send(err);
 
 			}
+			console.log("object id = " + rendezVous._id);
 			var response={id:""};
 			response.id = rendezVous._id;
 			res.json(response);
+			//envoie des mails aux utilisateurs à la création de l'évenement.
+			console.log("trying to send mails");
+				var users_to_mail = [];
+			for (var i = rendezVous.usersArray.length - 1; i >= 0; i--) {
+				var user_mail_temp = {
+				
+				        email: rendezVous.usersArray[i].email,
+				        name: {
+				          first: 'test_first',
+				          last: 'test_last'},
+				        creator:{
+				        	email: rendezVous.user.creatorEmail
+				        }
+
+			};
+			users_to_mail.push(user_mail_temp);
+		}
+		var template ='welcome-email'; 
+		var subject = 'bienvenue';
+		var fromWho = 'From the APP';
+		nodemailer.sendMails(users_to_mail,template,subject,fromWho);
 		});
-		
+	}	
 	})
 
 	.delete(function(req,res) {
 		var key='';
+		console.log("delete request");
+		console.log("req.params %j", req.params);
+			console.log('req.body: %j', req.body);
 			Place.findById(req.body.id ,function(err,meeting){
+
 					//var index = meeting.usersArray.indexOf(req.body.user.email);
 					var index = -1;
 					var response={success:"true",err:""};
@@ -347,6 +423,7 @@ router.route('/rendezvous')
 		})
 
 	.put(function(req, res) {
+		console.log("put request");
 			console.log('req.body: %j', req.body);
 			
 			Place.findById(req.body.id,function(err,meeting)
@@ -404,6 +481,18 @@ router.route('/rendezvous')
 
 			res.json(meetings);
 		});
+	});
+
+///////////////////////////////////////////////////////////////////////////////////////
+router.route('/meetingpoint')
+	.post(function(req,res){
+		console.log("post request to get meeting point");
+		console.log("req.params: %j", req.params);
+			console.log('req.body: %j', req.body);
+			var rendezVous = new Place();
+
+
+
 	});
 
 
