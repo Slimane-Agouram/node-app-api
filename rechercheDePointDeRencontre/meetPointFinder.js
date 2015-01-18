@@ -1,7 +1,7 @@
 
 function MeetPointFinder (){
 
-	this.maps = {} ;
+	this.maps = {} ,
 
 	this.findMeetPointFor = function( userArray , researchId , mapName ){
 
@@ -10,6 +10,7 @@ function MeetPointFinder (){
 	}
 
 }
+
 /*
 var fs = require('fs');
 var vm = require('vm');

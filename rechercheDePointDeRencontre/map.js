@@ -6,7 +6,7 @@ function Map(){
 	
 	
 	
-	/*this.loadMap = function( data ){
+	this.loadMap = function( data ){
 		
 		for(var i=0 ; i<data.map.points.length ; i++){
 			
@@ -84,7 +84,7 @@ function Map(){
 
 		return res;
 
-	}*/
+	}
 
 
 
