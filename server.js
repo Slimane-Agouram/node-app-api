@@ -57,6 +57,30 @@ router.get('/', function(req, res) {
     return re.test(email);
 } ;
 
+	function getUserName(email_to_search){
+		console.log("recherhce du nom et prenom : " + email_to_search);
+		MyUser.find({email:email_to_search}, function(err,user){
+			var result = {first: '', last: ''};
+			if (err)
+			{
+				console.log("err:" + err);
+				return result;
+			};
+
+
+			if(user.length>0)
+			{
+				 result.first= user[0].firstname;
+				result.last=user[0].lastname;
+				return result;
+			}
+			else
+			{
+				return result;
+			};
+		});
+	};
+
 
 
 //END OF TOOLS///////////////////////////////
@@ -294,11 +318,46 @@ router.route('/users/:user_id')
 				{
 					res.json(404,'User not found by email');
 				}
-			})
+			});
 
 
 		}
 		
+	})
+
+	.post(function(req,res){
+		console.log("requested validation of login:" + req.params.user_id);
+		MyUser.find({email: req.params.user_id}, function(err,user){
+				if (err) {
+					res.json(err);
+				};
+
+
+				if(user.length>0)
+				{
+					var index = -1;
+					for (var i = user.length - 1; i >= 0; i--) {
+						if (user[i].password!=NaN && user[i].password!=null && user[i].password!=undefined  && user[i].password == req.body.password) {
+									index = i;
+									break;
+						}
+					};
+					if (index>=0) {
+						res.json(200,{message:'Successfully logged in'});
+					}else
+					{
+						res.json(401,'error in credentials');
+
+					}
+
+					
+				}
+				else
+				{
+					res.json(404,'error in credentials');
+				}
+			});
+
 	});
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -358,8 +417,8 @@ router.route('/rendezvous')
 							var users_to_mail = [{
 								email: user_to_add.email,
 								 name: {
-				         			 first: 'test_first',
-				          			last: 'test_last'},
+				         			 first:'',
+				          			last: ''},
 				        		creator:{
 				        				email: meeting.user.creatorEmail
 				        				}}];
@@ -421,16 +480,22 @@ router.route('/rendezvous')
 			var response={id:""};
 			response.id = rendezVous._id;
 			res.json(response);
-			//envoie des mails aux utilisateurs à la création de l'évenement.
-			console.log("trying to send mails");
+	
+		});
+		console.log("trying to send mails");
+			var array_of_usernames= [];
+			// for (var i = rendezVous.usersArray.length - 1; i >= 0; i--) {
+			// 	array_of_usernames.push(getUserName(rendezVous.usersArray[i].email));
+			// };
 				var users_to_mail = [];
 			for (var i = rendezVous.usersArray.length - 1; i >= 0; i--) {
 				var user_mail_temp = {
 				
 				        email: rendezVous.usersArray[i].email,
 				        name: {
-				          first: 'test_first',
-				          last: 'test_last'},
+				          first: '',
+				          last: '',
+				      },
 				        creator:{
 				        	email: rendezVous.user.creatorEmail
 				        }
@@ -442,7 +507,6 @@ router.route('/rendezvous')
 		var subject = 'bienvenue';
 		var fromWho = 'From the APP';
 		nodemailer.sendMails(users_to_mail,template,subject,fromWho);
-		});
 	}	
 	})
 
