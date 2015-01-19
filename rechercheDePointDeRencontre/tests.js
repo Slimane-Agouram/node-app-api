@@ -1,4 +1,7 @@
 var tests = {};
+var mpf = new MeetPointFinder ();
+var map = {};
+
 
 /*****************************************************************************
 
@@ -7,10 +10,10 @@ var tests = {};
 
 
 ******************************************************************************/
-
+	//var tests= {};
+function initializeMap(){
 	tests['initialisation'] = {} ;
 
-	var mpf = new MeetPointFinder ();
 
 	
 	tests['initialisation']['mpf_maps_existance'] = ( mpf.maps != undefined );
@@ -26,8 +29,8 @@ var tests = {};
 	tests['initialisation']['mpf_maps.STRASBOURG_worseTime_existance'] = ( mpf.maps.STRASBOURG.db != undefined );
 	tests['initialisation']['mpf_maps.STRASBOURG_naiveBestAdresse_existance'] = ( mpf.maps.STRASBOURG.naiveBestAdresse != undefined );
 	tests['initialisation']['mpf_maps.STRASBOURG_computeV_existance'] = ( mpf.maps.STRASBOURG.computeV != undefined );
-	tests['initialisation']['mpf_maps.STRASBOURG_chooseBest_existance'] = ( mpf.maps.STRASBOURG.chooseBest != undefined );
-
+	tests['initialisation']['mpf_maps.STRASBOURG_chooseBest_existance'] = ( mpf.maps.STRASBOURG.chooseBest != undefined); 
+};
 
 
 /*****************************************************************************
@@ -37,10 +40,9 @@ var tests = {};
 
 
 ******************************************************************************/
+function loadMap(){
 
-
-
-	var map = {
+	map = {
 	    name:"Strasbourg",
 	    map:
 	    {
@@ -81,8 +83,12 @@ var tests = {};
 
 
 
-	console.log( "nb edges : " + JSON.stringify(mpf.maps.STRASBOURG.db({type:"edge"}).count(),null,4) );
-	console.log( "nb points : " + JSON.stringify(mpf.maps.STRASBOURG.db({type:"point"}).count(),null,4) );
+
+	//console.log( "nb edges : " + JSON.stringify(mpf.maps.STRASBOURG.db({type:"edge"}).count(),null,4) );
+	//console.log( "nb points : " + JSON.stringify(mpf.maps.STRASBOURG.db({type:"point"}).count(),null,4) );
+	return mpf.maps;
+
+};
 
 
 
@@ -95,4 +101,11 @@ var tests = {};
 
 
 ******************************************************************************/
-console.log( JSON.stringify(tests,null,4) );
+
+function returnResultsMap()
+{
+	console.log( JSON.stringify(tests,null,4) );
+
+};
+
+

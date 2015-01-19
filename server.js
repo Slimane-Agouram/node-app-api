@@ -23,13 +23,23 @@ mongoose.connect('mongodb://slimane.agouram:03081990@ds053380.mongolab.com:53380
 var MyUser = require('./models/user.js');
 var Place = require('./models/place.js');
 var nodemailer = require('./nodemailer.js');
-var jquery = require('./rechercheDePointDeRencontre/jquery-2.1.1.min.js');
-var taffy = require('./rechercheDePointDeRencontre/taffydb-master/taffy.js');
-var jquery = require('./rechercheDePointDeRencontre/geo.js');
-var meetpointFinder = require('./rechercheDePointDeRencontre/meetPointFinder.js')
-var map = require('./rechercheDePointDeRencontre/map.js');
+//var fileMap = require('./rechercheDePointDeRencontre/tests.js');
+//var taffy = require('./rechercheDePointDeRencontre/taffydb-master/taffy.js');
+//var jquery = require('./rechercheDePointDeRencontre/geo.js');
+//var meetpointFinder = require('./rechercheDePointDeRencontre/meetPointFinder.js')
+//var map = require('./rechercheDePointDeRencontre/map.js');
 
-
+var fs = require('fs');
+var vm = require('vm');
+var includeInThisContext = function(path) {
+    var code = fs.readFileSync(path);
+    vm.runInThisContext(code, path);
+}.bind(this);
+includeInThisContext(__dirname +"/rechercheDePointDeRencontre/taffydb-master/taffy.js");
+includeInThisContext( __dirname + "/rechercheDePointDeRencontre/geo.js");
+includeInThisContext( __dirname + "/rechercheDePointDeRencontre/map.js")
+includeInThisContext( __dirname + "/rechercheDePointDeRencontre/meetPointFinder.js");
+includeInThisContext(  __dirname + "/rechercheDePointDeRencontre/tests.js");
 
 
 // configure app to use bodyParser()
@@ -81,6 +91,16 @@ router.get('/', function(req, res) {
 		});
 	};
 
+	function getPoint(usersArray,mpf)
+	{
+					mpf = new MeetPointFinder ();
+					initializeMap();
+					 mpf.maps = loadMap();
+					 mpf.maps.STRASBOURG.loadMap(map);
+					 var res = mpf.findMeetPointFor(usersArray,1,'STRASBOURG');
+
+					 return res;
+	}
 
 
 //END OF TOOLS///////////////////////////////
@@ -572,6 +592,11 @@ router.route('/rendezvous')
 			Place.findById(req.body.id,function(err,meeting)
 				{
 					var response={success:"true", err:""};
+					if (err) {
+						response.success ='false';
+						response.err = err;
+						res.json(response);
+					};
 					if(meeting!=null)
 					{
 						var index = -1;
@@ -630,6 +655,7 @@ router.route('/rendezvous')
 router.route('/meetingpoint')
 	.post(function(req,res){
 		console.log("post request to get meeting point");
+							var mpf = new MeetPointFinder ();
 			//var mpf = new MeetPointFinder ();
 			console.log("Meetpointfinder executed");
 		//console.log("req.params: %j", req.params);
@@ -646,18 +672,23 @@ router.route('/meetingpoint')
 					}
 					else
 					{
-						console.log("meeting retrouvé");
+						console.log("meeting found");
+						var indexes = [];
+						for (var i = meeting.usersArray.length - 1; i >= 0; i--) {
+							if (meeting.usersArray[i].state == 'N' || meeting.usersArray[i].state=='AT') {
+								indexes.push(i);
+							};
+						};
+						for (var i = indexes.length - 1; i >= 0; i--) {
+							meeting.usersArray.splice(indexes[i],1);
+						};
+						console.log("modified array - for one meeting");
+						var point_recoverd = getPoint(meeting.usersArray,mpf);
 						var new_format_for_meeting = {
 							id:meeting._id,
 							users: meeting.usersArray,
-							point:{
-								lat:0,
-								lng:0,
-								adress:""
-							}
+							point:point_recoverd
 						};
-						
-
 						res.json(new_format_for_meeting);
 					}
 				});
@@ -674,26 +705,72 @@ router.route('/meetingpoint')
 						res.json(response_null);
 					}
 					else
-					{
-						console.log("longeur: " +meetings.length );
+					{ 
+						console.log("Generatings a lot of meetings , longeur: " +meetings.length );
+						var indexes = [];
+						var points = [];
 						var new_array_to_return = [];
+
+									for (var i = meetings.length - 1; i >= 0; i--) {
+
+											for (var k = meetings[i].usersArray.length - 1; k >= 0; k--) {
+												if (meetings[i].usersArray[k].state == 'N' || meetings[i].usersArray[k].state=='AT') {
+													indexes.push(k);
+												};
+											};
+
+											for (var j = indexes.length - 1; j >= 0; j--) {
+												meetings[i].usersArray.splice(indexes[j],1);
+											};
+											indexes = [];
+
+										console.log("meeting: %j", meetings[i].usersArray);
+										points.push(getPoint(meetings[i].usersArray,mpf));
+
+
+
+									};
+
+						
+
 						for (var i = meetings.length - 1; i >= 0; i--) {
 							var new_format_for_meeting = {
 							id:meetings._id,
 							users: meetings[i].usersArray,
-							point:{
-								lat:0,
-								lng:0,
-								adress:""
-							}
+							point: points[i]
 						};
 						new_array_to_return.push(new_format_for_meeting);
 						};
 						res.json(new_array_to_return);
 					}
 
+
 			});
 			}
+			// console.log("generating array of participants");
+			// Place.find({"usersArray.state":{$in:['Y','DK']}}, function(err, users){
+			// 	if(err)
+			// 		res.json(err);
+
+			// 	if (users.length>0) {
+
+			// 		// console.log("users that will come : %j", users[0].usersArray.length);
+			// 		getPoint(users[0].usersArray,mpf);
+			// 		// initializeMap();
+			// 		// console.log("executing meetpointfinder!");
+			// 		// console.log("MeetPointFinder instanciated");
+			// 		//  mpf.maps = loadMap();
+			// 		//  console.log("maps: %j", mpf.maps);
+			// 		//  mpf.maps.STRASBOURG.loadMap(map);
+			// 		//  var res = mpf.findMeetPointFor(users[0].usersArray,1,'STRASBOURG');
+			// 		//  console.log(new returnResultsMap);
+			// 		//  console.log('results: %j', res);
+
+			// 	};
+			// });
+
+			
+
 
 
 
