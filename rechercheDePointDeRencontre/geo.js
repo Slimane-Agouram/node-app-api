@@ -1,5 +1,16 @@
+/**
+ * geography module
+ */
 GEO = {
-	
+	/**
+	 * compute the distance in meter between two points.
+	 *
+	 * @param {number} lat1 the first point latitude
+	 * @param {number} lng1 the first point longitude
+	 * @param {number} lat2 the second point latitude
+	 * @param {number} lng2 the second point longitude
+	 *
+	 */
 	computeDistance : function(lat1,lng1,lat2,lng2){
 		
 		var LAT1 = lat1 * Math.PI * 2 / 360 ;
