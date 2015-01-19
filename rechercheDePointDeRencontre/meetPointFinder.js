@@ -3,9 +3,20 @@ function MeetPointFinder (){
 
 	this.maps = {} ,
 
-	this.findMeetPointFor = function( userArray , researchId , mapName ){
+	this.findMeetPointFor = function( userArray , researchId , mapName , useIntelligentAlgorithme ){
 
-		return maps[ mapName ].naiveBestAdresse( userArray );
+		if( useIntelligentAlgorithme != undefined && useIntelligentAlgorithme == true ){
+		
+			for( var i=0 ; i < UserArray.length ; i++ ){
+			
+				UserArray[i]['vector'] = this.maps[ mapName ].computeV( UserArray[i] );
+			
+			}
+			return this.maps[ mapName ].chooseBest( userArray );
+
+		}
+
+		return this.maps[ mapName ].naiveBestAdresse( userArray );
 
 	}
 
