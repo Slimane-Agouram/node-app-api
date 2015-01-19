@@ -232,10 +232,27 @@ router.route('/users/:user_id')
 			if (err)
 				res.send(err);
 
+			
+			if (req.body.firstname!=null && req.body.firstname!=undefined) {
 			user.firstname = req.body.firstname; 	// update the users info
+
+			};
+
+			if (req.body.lastname!=null && req.body.lastname!=undefined) {
 			user.lastname = req.body.lastname;
+
+			};
+
+			if (req.body.email!=null && req.body.email!=undefined && req.body.email!='') {
 			user.email = req.body.email;
+
+			};
+
+			if(req.body.password!=null && req.body.password!='' && req.body.password!=undefined){
 			user.password = req.body.password;
+
+			};
+
 			console.log("new attributes to be updated: " + user.firstname +" " + user.lastname );
 
 			// save the user
@@ -262,10 +279,25 @@ router.route('/users/:user_id')
 			if (user.length>0) {
 			////////
 			for (var i = user.length - 1; i >= 0; i--) {
-				user[i].firstname = req.body.firstname; 	// update the users info
-				user[i].lastname = req.body.lastname;
-				user[i].email = req.body.email;
-				user[i].password = req.body.password;
+				if (req.body.firstname!=null && req.body.firstname!=undefined) {
+			user[i].firstname = req.body.firstname; 	// update the users info
+
+			};
+
+			if (req.body.lastname!=null && req.body.lastname!=undefined) {
+			user[i].lastname = req.body.lastname;
+
+			};
+
+			if (req.body.email!=null && req.body.email!=undefined && req.body.email!='') {
+			user[i].email = req.body.email;
+
+			};
+
+			if(req.body.password!=null && req.body.password!='' && req.body.password!=undefined){
+			user[i].password = req.body.password;
+
+			};
 			};
 			// save the user
 			for (var i = user.length - 1; i >= 0; i--) {
@@ -603,9 +635,14 @@ router.route('/rendezvous')
 						for (var i = meeting.usersArray.length - 1; i >= 0; i--) {
 							if (meeting.usersArray[i].email == req.body.user.email) {
 								index = i;
-								meeting.usersArray[i].lat = req.body.user.lat;
-								meeting.usersArray[i].lng = req.body.user.lng;
-								meeting.usersArray[i].state = req.body.user.state;
+								if (req.body.user.lat!= undefined && req.body.user.lat!= null) {
+									meeting.usersArray[i].lat = req.body.user.lat;
+								};
+								if (req.body.user.lng!= undefined && req.body.user.lng!= null) {
+									meeting.usersArray[i].lng = req.body.user.lng;
+								};
+								if (req.body.user.state!=undefined && req.body.user.state!=null) 
+									meeting.usersArray[i].state = req.body.user.state;
 							};
 						};
 
@@ -724,7 +761,7 @@ router.route('/meetingpoint')
 											};
 											indexes = [];
 
-										console.log("meeting: %j", meetings[i].usersArray);
+										//console.log("meeting: %j", meetings[i].usersArray);
 										points.push(getPoint(meetings[i].usersArray,mpf));
 
 
