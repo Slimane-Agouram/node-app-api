@@ -11,6 +11,7 @@ var MyUserSchema   = new Schema({
 	firstname: String,
 	lastname: String,
 	email: String,
+	password: String,
 	date: { type: Date, default: Date.now },
 	places_history: [{title:String, date: Date, place: {type: mongoose.Schema.Types.ObjectId, ref: 'Place'} }] //this should work, but doesn't seem to, the rest works though
 });

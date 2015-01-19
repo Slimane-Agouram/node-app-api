@@ -1,9 +1,12 @@
 
 function MeetPointFinder (){
 
-	this.maps = {} ,
+	this.maps = {} ;
+
 
 	this.findMeetPointFor = function( userArray , researchId , mapName , useIntelligentAlgorithme ){
+
+		console.log("length of userArrays: %j", userArray);
 
 		if( useIntelligentAlgorithme != undefined && useIntelligentAlgorithme == true ){
 		
@@ -20,14 +23,15 @@ function MeetPointFinder (){
 
 	}
 
-}
+};
 
-/*
-var fs = require('fs');
-var vm = require('vm');
-var includeInThisContext = function(path) {
-    var code = fs.readFileSync(path);
-    vm.runInThisContext(code, path);
-}.bind(this);
-includeInThisContext(__dirname+"/models/car.js");
-*/
+
+//exports.MeetPointFinder = MeetPointFinder;
+// var fs = require('fs');
+// var vm = require('vm');
+// var includeInThisContext = function(path) {
+    // var code = fs.readFileSync(path);
+    // vm.runInThisContext(code, path);
+// }.bind(this);
+// includeInThisContext(__dirname+"/models/car.js");
+

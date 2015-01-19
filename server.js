@@ -23,6 +23,24 @@ mongoose.connect('mongodb://slimane.agouram:03081990@ds053380.mongolab.com:53380
 var MyUser = require('./models/user.js');
 var Place = require('./models/place.js');
 var nodemailer = require('./nodemailer.js');
+//var fileMap = require('./rechercheDePointDeRencontre/tests.js');
+//var taffy = require('./rechercheDePointDeRencontre/taffydb-master/taffy.js');
+//var jquery = require('./rechercheDePointDeRencontre/geo.js');
+//var meetpointFinder = require('./rechercheDePointDeRencontre/meetPointFinder.js')
+//var map = require('./rechercheDePointDeRencontre/map.js');
+
+var fs = require('fs');
+var vm = require('vm');
+var includeInThisContext = function(path) {
+    var code = fs.readFileSync(path);
+    vm.runInThisContext(code, path);
+}.bind(this);
+includeInThisContext(__dirname +"/rechercheDePointDeRencontre/taffydb-master/taffy.js");
+includeInThisContext( __dirname + "/rechercheDePointDeRencontre/geo.js");
+includeInThisContext( __dirname + "/rechercheDePointDeRencontre/map.js")
+includeInThisContext( __dirname + "/rechercheDePointDeRencontre/meetPointFinder.js");
+includeInThisContext(  __dirname + "/rechercheDePointDeRencontre/tests.js");
+
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -49,6 +67,40 @@ router.get('/', function(req, res) {
     return re.test(email);
 } ;
 
+	function getUserName(email_to_search){
+		console.log("recherhce du nom et prenom : " + email_to_search);
+		MyUser.find({email:email_to_search}, function(err,user){
+			var result = {first: '', last: ''};
+			if (err)
+			{
+				console.log("err:" + err);
+				return result;
+			};
+
+
+			if(user.length>0)
+			{
+				 result.first= user[0].firstname;
+				result.last=user[0].lastname;
+				return result;
+			}
+			else
+			{
+				return result;
+			};
+		});
+	};
+
+	function getPoint(usersArray,mpf)
+	{
+					mpf = new MeetPointFinder ();
+					initializeMap();
+					 mpf.maps = loadMap();
+					 mpf.maps.STRASBOURG.loadMap(map);
+					 var res = mpf.findMeetPointFor(usersArray,1,'STRASBOURG');
+
+					 return res;
+	}
 
 
 //END OF TOOLS///////////////////////////////
@@ -73,6 +125,37 @@ router.route('/users')
 		if(req.body.email!= '' && req.body.email!= null && validateEmail(req.body.email))
 		{
 			myUser.email = req.body.email;
+			myUser.password = req.body.password;
+			MyUser.find({email:myUser.email},function(err,user){
+				if (err)
+					res.send(err);
+
+				if (user.length!=0) {
+					res.json(500,'User already exists, could not post the user');
+
+				}else{
+
+					myUser.save(function(err) {
+			if (err)
+				res.send(err);
+
+			res.json({ success:"true", message: 'User created!' });
+			var users_to_mail = [{
+								email: myUser.email,
+								password: myUser.password,
+								 name: {
+				         			 first: myUser.firstname,
+				          			last: myUser.lastname},
+				        		}];
+							
+							var template ='signup-email'; 
+							var subject = 'bienvenue';
+							var fromWho = 'From the APP';
+							nodemailer.sendMails(users_to_mail,template,subject,fromWho);
+
+		});
+				};
+		});
 		}
 		else
 		{
@@ -81,12 +164,9 @@ router.route('/users')
 
 		}
 		// save the user and check for errors
-		myUser.save(function(err) {
-			if (err)
-				res.send(err);
 
-			res.json({ message: 'User created!' });
-		});
+
+		
 		
 	})
 
@@ -152,9 +232,27 @@ router.route('/users/:user_id')
 			if (err)
 				res.send(err);
 
+			
+			if (req.body.firstname!=null && req.body.firstname!=undefined) {
 			user.firstname = req.body.firstname; 	// update the users info
+
+			};
+
+			if (req.body.lastname!=null && req.body.lastname!=undefined) {
 			user.lastname = req.body.lastname;
+
+			};
+
+			if (req.body.email!=null && req.body.email!=undefined && req.body.email!='') {
 			user.email = req.body.email;
+
+			};
+
+			if(req.body.password!=null && req.body.password!='' && req.body.password!=undefined){
+			user.password = req.body.password;
+
+			};
+
 			console.log("new attributes to be updated: " + user.firstname +" " + user.lastname );
 
 			// save the user
@@ -181,9 +279,25 @@ router.route('/users/:user_id')
 			if (user.length>0) {
 			////////
 			for (var i = user.length - 1; i >= 0; i--) {
-				user[i].firstname = req.body.firstname; 	// update the users info
-				user[i].lastname = req.body.lastname;
-				user[i].email = req.body.email;
+				if (req.body.firstname!=null && req.body.firstname!=undefined) {
+			user[i].firstname = req.body.firstname; 	// update the users info
+
+			};
+
+			if (req.body.lastname!=null && req.body.lastname!=undefined) {
+			user[i].lastname = req.body.lastname;
+
+			};
+
+			if (req.body.email!=null && req.body.email!=undefined && req.body.email!='') {
+			user[i].email = req.body.email;
+
+			};
+
+			if(req.body.password!=null && req.body.password!='' && req.body.password!=undefined){
+			user[i].password = req.body.password;
+
+			};
 			};
 			// save the user
 			for (var i = user.length - 1; i >= 0; i--) {
@@ -191,7 +305,7 @@ router.route('/users/:user_id')
 				if (err)
 					res.send(err);
 
-				res.json({ message: 'User updated!' });
+				res.json({success:"true", message: 'User updated!' });
 			});
 
 			};
@@ -202,7 +316,23 @@ router.route('/users/:user_id')
 			{
 				res.json(404,'User not found');
 			}
-			
+				
+			var users_to_mail = [{
+								email: user[0].email,
+								password: user[0].password,
+								 name: {
+				         			 first: user[0].firstname,
+				          			last: user[0].lastname},
+				        		}];
+							
+							var template ='change-info-mail'; 
+							var subject = 'changement de données utilisateur';
+							var fromWho = 'From the APP';
+							nodemailer.sendMails(users_to_mail,template,subject,fromWho);
+
+
+
+
 		});
 				}
 
@@ -240,11 +370,46 @@ router.route('/users/:user_id')
 				{
 					res.json(404,'User not found by email');
 				}
-			})
+			});
 
 
 		}
 		
+	})
+
+	.post(function(req,res){
+		console.log("requested validation of login:" + req.params.user_id);
+		MyUser.find({email: req.params.user_id}, function(err,user){
+				if (err) {
+					res.json(err);
+				};
+
+
+				if(user.length>0)
+				{
+					var index = -1;
+					for (var i = user.length - 1; i >= 0; i--) {
+						if (user[i].password!=NaN && user[i].password!=null && user[i].password!=undefined  && user[i].password == req.body.password) {
+									index = i;
+									break;
+						}
+					};
+					if (index>=0) {
+						res.json(200,{message:'Successfully logged in'});
+					}else
+					{
+						res.json(401,'error in credentials');
+
+					}
+
+					
+				}
+				else
+				{
+					res.json(404,'error in credentials');
+				}
+			});
+
 	});
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -252,6 +417,10 @@ router.route('/users/:user_id')
 router.route('/rendezvous')
 	.post(function(req, res) {
 				var rendezVous = new Place();
+				var first= '';
+				var last = '';
+				var creator_first = '';
+				var creator_last = '';
 		if(req.body.id!=null && req.body.id!=NaN)
 		{
 			var user_exists = false;
@@ -299,21 +468,51 @@ router.route('/rendezvous')
 								}
 									res.json(response);
 							});
+							
+							console.log("trying to search by email: " + req.body.user.email);
+							MyUser.find({"email":req.body.user.email},function(err,user){
+								if (err) {
+									console.log(err);
+								};
 
-							console.log("trying to send mails");
+								if (user.length>0) {
+									console.log("found user, trying to recover data: %j ", user);
+									first = user[0].firstname;
+									last = user[0].lastname;
+								};
+
+								MyUser.find({"email":meeting.user.creatorEmail},function(err,creator){
+								if (err) {
+									console.log(err);
+								};
+
+								if (creator.length>0) {
+									creator_first = creator[0].firstname;
+									creator_last = creator[0].lastname;
+								};
+
+								console.log("trying to send mails + : " + creator_first + " " + creator_last);
 							var users_to_mail = [{
 								email: user_to_add.email,
 								 name: {
-				         			 first: 'test_first',
-				          			last: 'test_last'},
+				         			 first:first,
+				          			last: last},
 				        		creator:{
-				        				email: meeting.user.creatorEmail
+				        				email: meeting.user.creatorEmail,
+				        				first: creator_first,
+				        				last: creator_last
 				        				}}];
 							
 							var template ='welcome-email'; 
 							var subject = 'bienvenue';
 							var fromWho = 'From the APP';
 							nodemailer.sendMails(users_to_mail,template,subject,fromWho);
+
+							});
+
+								
+							});
+							
 
 						};
 
@@ -367,18 +566,45 @@ router.route('/rendezvous')
 			var response={id:""};
 			response.id = rendezVous._id;
 			res.json(response);
-			//envoie des mails aux utilisateurs à la création de l'évenement.
-			console.log("trying to send mails");
+	
+		});
+
+		MyUser.find({email: req.body.user.email}, function(err, user){
+			if (err) {
+				console.log(err);
+			};
+
+			if (user.length>0) {
+				first = user[0].firstname;
+				last = user[0].lastname;
+			};
+
+			MyUser.find({email: rendezVous.user.creatorEmail}, function(err, creator){
+				if (err) {
+					console.log(err);
+				};
+
+				if (creator.length>0) {
+					creator_first = creator[0].firstname;
+					creator_last = creator[0].lastname;
+				};
+			var array_of_usernames= [];
+			// for (var i = rendezVous.usersArray.length - 1; i >= 0; i--) {
+			// 	array_of_usernames.push(getUserName(rendezVous.usersArray[i].email));
+			// };
 				var users_to_mail = [];
 			for (var i = rendezVous.usersArray.length - 1; i >= 0; i--) {
 				var user_mail_temp = {
 				
 				        email: rendezVous.usersArray[i].email,
 				        name: {
-				          first: 'test_first',
-				          last: 'test_last'},
+				          first: first,
+				          last: last,
+				      },
 				        creator:{
-				        	email: rendezVous.user.creatorEmail
+				        	email: rendezVous.user.creatorEmail,
+				        	first: creator_first,
+				        	last: creator_last
 				        }
 
 			};
@@ -388,7 +614,11 @@ router.route('/rendezvous')
 		var subject = 'bienvenue';
 		var fromWho = 'From the APP';
 		nodemailer.sendMails(users_to_mail,template,subject,fromWho);
+
+			});
 		});
+
+		
 	}	
 	})
 
@@ -454,15 +684,25 @@ router.route('/rendezvous')
 			Place.findById(req.body.id,function(err,meeting)
 				{
 					var response={success:"true", err:""};
+					if (err) {
+						response.success ='false';
+						response.err = err;
+						res.json(response);
+					};
 					if(meeting!=null)
 					{
 						var index = -1;
 						for (var i = meeting.usersArray.length - 1; i >= 0; i--) {
 							if (meeting.usersArray[i].email == req.body.user.email) {
 								index = i;
-								meeting.usersArray[i].lat = req.body.user.lat;
-								meeting.usersArray[i].lng = req.body.user.lng;
-								meeting.usersArray[i].state = req.body.user.state;
+								if (req.body.user.lat!= undefined && req.body.user.lat!= null) {
+									meeting.usersArray[i].lat = req.body.user.lat;
+								};
+								if (req.body.user.lng!= undefined && req.body.user.lng!= null) {
+									meeting.usersArray[i].lng = req.body.user.lng;
+								};
+								if (req.body.user.state!=undefined && req.body.user.state!=null) 
+									meeting.usersArray[i].state = req.body.user.state;
 							};
 						};
 
@@ -512,8 +752,11 @@ router.route('/rendezvous')
 router.route('/meetingpoint')
 	.post(function(req,res){
 		console.log("post request to get meeting point");
-		console.log("req.params: %j", req.params);
-			console.log('req.body: %j', req.body);
+							var mpf = new MeetPointFinder ();
+			//var mpf = new MeetPointFinder ();
+			console.log("Meetpointfinder executed");
+		//console.log("req.params: %j", req.params);
+			//console.log('req.body: %j', req.body);
 			var rendezVous = new Place();
 			if(req.body.id!=null && req.body.id !=NaN)
 			{
@@ -526,18 +769,23 @@ router.route('/meetingpoint')
 					}
 					else
 					{
-						console.log("meeting retrouvé");
+						console.log("meeting found");
+						var indexes = [];
+						for (var i = meeting.usersArray.length - 1; i >= 0; i--) {
+							if (meeting.usersArray[i].state == 'N' || meeting.usersArray[i].state=='AT') {
+								indexes.push(i);
+							};
+						};
+						for (var i = indexes.length - 1; i >= 0; i--) {
+							meeting.usersArray.splice(indexes[i],1);
+						};
+						console.log("modified array - for one meeting");
+						var point_recoverd = getPoint(meeting.usersArray,mpf);
 						var new_format_for_meeting = {
 							id:meeting._id,
 							users: meeting.usersArray,
-							point:{
-								lat:0,
-								lng:0,
-								adress:""
-							}
+							point:point_recoverd
 						};
-						
-
 						res.json(new_format_for_meeting);
 					}
 				});
@@ -554,26 +802,72 @@ router.route('/meetingpoint')
 						res.json(response_null);
 					}
 					else
-					{
-						console.log("longeur: " +meetings.length );
+					{ 
+						console.log("Generatings a lot of meetings , longeur: " +meetings.length );
+						var indexes = [];
+						var points = [];
 						var new_array_to_return = [];
+
+									for (var i = meetings.length - 1; i >= 0; i--) {
+
+											for (var k = meetings[i].usersArray.length - 1; k >= 0; k--) {
+												if (meetings[i].usersArray[k].state == 'N' || meetings[i].usersArray[k].state=='AT') {
+													indexes.push(k);
+												};
+											};
+
+											for (var j = indexes.length - 1; j >= 0; j--) {
+												meetings[i].usersArray.splice(indexes[j],1);
+											};
+											indexes = [];
+
+										//console.log("meeting: %j", meetings[i].usersArray);
+										points.push(getPoint(meetings[i].usersArray,mpf));
+
+
+
+									};
+
+						
+
 						for (var i = meetings.length - 1; i >= 0; i--) {
 							var new_format_for_meeting = {
 							id:meetings._id,
 							users: meetings[i].usersArray,
-							point:{
-								lat:0,
-								lng:0,
-								adress:""
-							}
+							point: points[i]
 						};
 						new_array_to_return.push(new_format_for_meeting);
 						};
 						res.json(new_array_to_return);
 					}
 
+
 			});
 			}
+			// console.log("generating array of participants");
+			// Place.find({"usersArray.state":{$in:['Y','DK']}}, function(err, users){
+			// 	if(err)
+			// 		res.json(err);
+
+			// 	if (users.length>0) {
+
+			// 		// console.log("users that will come : %j", users[0].usersArray.length);
+			// 		getPoint(users[0].usersArray,mpf);
+			// 		// initializeMap();
+			// 		// console.log("executing meetpointfinder!");
+			// 		// console.log("MeetPointFinder instanciated");
+			// 		//  mpf.maps = loadMap();
+			// 		//  console.log("maps: %j", mpf.maps);
+			// 		//  mpf.maps.STRASBOURG.loadMap(map);
+			// 		//  var res = mpf.findMeetPointFor(users[0].usersArray,1,'STRASBOURG');
+			// 		//  console.log(new returnResultsMap);
+			// 		//  console.log('results: %j', res);
+
+			// 	};
+			// });
+
+			
+
 
 
 
