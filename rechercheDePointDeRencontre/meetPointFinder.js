@@ -25,7 +25,6 @@ function MeetPointFinder (){
 
 };
 
-
 //exports.MeetPointFinder = MeetPointFinder;
 // var fs = require('fs');
 // var vm = require('vm');
