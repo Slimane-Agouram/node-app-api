@@ -417,6 +417,10 @@ router.route('/users/:user_id')
 router.route('/rendezvous')
 	.post(function(req, res) {
 				var rendezVous = new Place();
+				var first= '';
+				var last = '';
+				var creator_first = '';
+				var creator_last = '';
 		if(req.body.id!=null && req.body.id!=NaN)
 		{
 			var user_exists = false;
@@ -464,21 +468,51 @@ router.route('/rendezvous')
 								}
 									res.json(response);
 							});
+							
+							console.log("trying to search by email: " + req.body.user.email);
+							MyUser.find({"email":req.body.user.email},function(err,user){
+								if (err) {
+									console.log(err);
+								};
 
-							console.log("trying to send mails");
+								if (user.length>0) {
+									console.log("found user, trying to recover data: %j ", user);
+									first = user[0].firstname;
+									last = user[0].lastname;
+								};
+
+								MyUser.find({"email":meeting.user.creatorEmail},function(err,creator){
+								if (err) {
+									console.log(err);
+								};
+
+								if (creator.length>0) {
+									creator_first = creator[0].firstname;
+									creator_last = creator[0].lastname;
+								};
+
+								console.log("trying to send mails + : " + creator_first + " " + creator_last);
 							var users_to_mail = [{
 								email: user_to_add.email,
 								 name: {
-				         			 first:'',
-				          			last: ''},
+				         			 first:first,
+				          			last: last},
 				        		creator:{
-				        				email: meeting.user.creatorEmail
+				        				email: meeting.user.creatorEmail,
+				        				first: creator_first,
+				        				last: creator_last
 				        				}}];
 							
 							var template ='welcome-email'; 
 							var subject = 'bienvenue';
 							var fromWho = 'From the APP';
 							nodemailer.sendMails(users_to_mail,template,subject,fromWho);
+
+							});
+
+								
+							});
+							
 
 						};
 
@@ -534,7 +568,26 @@ router.route('/rendezvous')
 			res.json(response);
 	
 		});
-		console.log("trying to send mails");
+
+		MyUser.find({email: req.body.user.email}, function(err, user){
+			if (err) {
+				console.log(err);
+			};
+
+			if (user.length>0) {
+				first = user[0].firstname;
+				last = user[0].lastname;
+			};
+
+			MyUser.find({email: rendezVous.user.creatorEmail}, function(err, creator){
+				if (err) {
+					console.log(err);
+				};
+
+				if (creator.length>0) {
+					creator_first = creator[0].firstname;
+					creator_last = creator[0].lastname;
+				};
 			var array_of_usernames= [];
 			// for (var i = rendezVous.usersArray.length - 1; i >= 0; i--) {
 			// 	array_of_usernames.push(getUserName(rendezVous.usersArray[i].email));
@@ -545,11 +598,13 @@ router.route('/rendezvous')
 				
 				        email: rendezVous.usersArray[i].email,
 				        name: {
-				          first: '',
-				          last: '',
+				          first: first,
+				          last: last,
 				      },
 				        creator:{
-				        	email: rendezVous.user.creatorEmail
+				        	email: rendezVous.user.creatorEmail,
+				        	first: creator_first,
+				        	last: creator_last
 				        }
 
 			};
@@ -559,6 +614,11 @@ router.route('/rendezvous')
 		var subject = 'bienvenue';
 		var fromWho = 'From the APP';
 		nodemailer.sendMails(users_to_mail,template,subject,fromWho);
+
+			});
+		});
+
+		
 	}	
 	})
 
