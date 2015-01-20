@@ -23,12 +23,6 @@ mongoose.connect('mongodb://slimane.agouram:03081990@ds053380.mongolab.com:53380
 var MyUser = require('./models/user.js');
 var Place = require('./models/place.js');
 var nodemailer = require('./nodemailer.js');
-//var fileMap = require('./rechercheDePointDeRencontre/tests.js');
-//var taffy = require('./rechercheDePointDeRencontre/taffydb-master/taffy.js');
-//var jquery = require('./rechercheDePointDeRencontre/geo.js');
-//var meetpointFinder = require('./rechercheDePointDeRencontre/meetPointFinder.js')
-//var map = require('./rechercheDePointDeRencontre/map.js');
-
 var fs = require('fs');
 var vm = require('vm');
 var includeInThisContext = function(path) {
@@ -97,7 +91,7 @@ router.get('/', function(req, res) {
 					initializeMap();
 					 mpf.maps = loadMap();
 					 mpf.maps.STRASBOURG.loadMap(map);
-					 var res = mpf.findMeetPointFor(usersArray,1,'STRASBOURG');
+					 var res = mpf.findMeetPointFor(usersArray,1,'STRASBOURG',true);
 
 					 return res;
 	}
@@ -844,32 +838,6 @@ router.route('/meetingpoint')
 
 			});
 			}
-			// console.log("generating array of participants");
-			// Place.find({"usersArray.state":{$in:['Y','DK']}}, function(err, users){
-			// 	if(err)
-			// 		res.json(err);
-
-			// 	if (users.length>0) {
-
-			// 		// console.log("users that will come : %j", users[0].usersArray.length);
-			// 		getPoint(users[0].usersArray,mpf);
-			// 		// initializeMap();
-			// 		// console.log("executing meetpointfinder!");
-			// 		// console.log("MeetPointFinder instanciated");
-			// 		//  mpf.maps = loadMap();
-			// 		//  console.log("maps: %j", mpf.maps);
-			// 		//  mpf.maps.STRASBOURG.loadMap(map);
-			// 		//  var res = mpf.findMeetPointFor(users[0].usersArray,1,'STRASBOURG');
-			// 		//  console.log(new returnResultsMap);
-			// 		//  console.log('results: %j', res);
-
-			// 	};
-			// });
-
-			
-
-
-
 
 	});
 

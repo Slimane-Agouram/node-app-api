@@ -35,9 +35,9 @@ function MeetPointFinder (){
 			 * For all users a vector is compututed. this vector contain the bestTime to go to each map point in a resonable number of transport's changes
 			 *
 			 */
-			for( var i=0 ; i < UserArray.length ; i++ ){
+			for( var i=0 ; i < userArray.length ; i++ ){
 			
-				UserArray[i]['vector'] = this.maps[ mapName ].computeV( UserArray[i] );
+				userArray[i]['vector'] = this.maps[ mapName ].computeV( userArray[i] );
 			
 			}
 
