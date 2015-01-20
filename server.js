@@ -142,7 +142,9 @@ router.route('/users')
 		if(req.body.email!= '' && req.body.email!= null && validateEmail(req.body.email))
 		{
 			myUser.email = req.body.email;
-			myUser.password = req.body.password;
+			var password= new Buffer(req.body.password,'base64');
+			password = password.toString();
+			myUser.password = password;
 			MyUser.find({email:myUser.email},function(err,user){
 				if (err)
 					res.send(err);
@@ -267,7 +269,9 @@ router.route('/users/:user_id')
 			};
 
 			if(req.body.password!=null && req.body.password!='' && req.body.password!=undefined){
-			user.password = req.body.password;
+				var password = new Buffer(req.body.password,'base64');
+				password = password.toString();
+			user.password = password;
 
 			};
 
@@ -310,7 +314,9 @@ router.route('/users/:user_id')
 			};
 
 			if(req.body.password!=null && req.body.password!='' && req.body.password!=undefined){
-			user[i].password = req.body.password;
+			var password = new Buffer(req.body.password,'base64');
+				password = password.toString();
+			user[i].password = password;
 
 			};
 			};
@@ -403,9 +409,12 @@ router.route('/users/:user_id')
 
 				if(user.length>0) //we found something here
 				{
+					var password = new Buffer(req.body.password,'base64');
+					password = password.toString();
 					var index = -1;
 					for (var i = user.length - 1; i >= 0; i--) { //check password hash validity
-						if (user[i].password!=NaN && user[i].password!=null && user[i].password!=undefined  && user[i].password == req.body.password) {
+
+						if (user[i].password!=NaN && user[i].password!=null && user[i].password!=undefined  && user[i].password == password) {
 									index = i;
 									break;
 						}
