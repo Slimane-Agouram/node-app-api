@@ -92,6 +92,32 @@ router.get('/', function(req, res) {
 //END OF TOOLS///////////////////////////////
 
 
+//TEST function for SMTP templates/////
+function test_SMTP(template,subject, whoFrom){
+var users_to_mail = [{
+								email: "slimane.agouram@gmail.com",
+								password: "dummy",
+								 name: {
+				         			 first: "slimane___",
+				          			last: "agouram____"},
+				          		creator:{
+				          			email: "dummy@dummy.com",
+				          			first: "slimane",
+				          			last: "AGOURAM"
+				          		}
+				        		}];
+
+	//console.log("testing SMTP, from: " + whoFrom + " ,template: "+ template + " ,subject: " + subject);
+nodemailer.sendMails(users_to_mail,template,subject,whoFrom);
+};
+
+//test_SMTP("welcome-email","test welcome", "test-welcome");
+//test_SMTP("signup-email","test welcome", "test-welcome");
+//test_SMTP("change-info-mail","test welcome", "test-welcome");
+
+////end///////////////////////
+
+
 //ROUTES/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // // more routes for our API will happen here
@@ -134,7 +160,7 @@ router.route('/users')
 								password: myUser.password,
 								 name: {
 				         			 first: myUser.firstname,
-				          			last: myUser.lastname},
+				          			last: myUser.lastname.toUpperCase()},
 				        		}];
 							
 							var template ='signup-email'; 
@@ -168,7 +194,7 @@ router.route('/users')
 				var new_user_temp = {
 					email: users[i].email,
 					firstname: users[i].firstname,
-					lastname: users[i].lastname
+					lastname: users[i].lastname.toUpperCase()
 				};
 				new_users.push(new_user_temp);
 			};
@@ -309,7 +335,7 @@ router.route('/users/:user_id')
 								password: user[0].password,
 								 name: {
 				         			 first: user[0].firstname,
-				          			last: user[0].lastname},
+				          			last: user[0].lastname.toUpperCase()},
 				        		}];
 							
 							var template ='change-info-mail'; 
@@ -465,7 +491,7 @@ router.route('/rendezvous')
 
 								if (user.length>0) {
 									first = user[0].firstname; //fetching firstname and lastname 
-									last = user[0].lastname;
+									last = user[0].lastname.toUpperCase();
 								};
 
 								MyUser.find({"email":meeting.user.creatorEmail},function(err,creator){ //now, we need lastname and firstname of the meeting's creator, again for emails to include them
@@ -475,7 +501,7 @@ router.route('/rendezvous')
 
 								if (creator.length>0) { //found creator
 									creator_first = creator[0].firstname;  //fetching lastname and firstname
-									creator_last = creator[0].lastname;
+									creator_last = creator[0].lastname.toUpperCase();
 								};
 									//now we are going to call the mail sending routine
 							var users_to_mail = [{ //we construct our object of the reciever and include jade data in it
@@ -559,7 +585,7 @@ router.route('/rendezvous')
 
 			if (user.length>0) {
 				first = user[0].firstname; //if user already registred then fetch it's name data
-				last = user[0].lastname;
+				last = user[0].lastname.toUpperCase();
 			};
 
 			MyUser.find({email: rendezVous.user.creatorEmail}, function(err, creator){ //we look at first for the creator's name data
@@ -583,7 +609,7 @@ router.route('/rendezvous')
 				        creator:{
 				        	email: rendezVous.user.creatorEmail,
 				        	first: creator_first,
-				        	last: creator_last
+				        	last: creator_last.toUpperCase()
 				        }
 
 			};
