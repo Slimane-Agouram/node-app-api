@@ -899,10 +899,10 @@ router.route('/contactus')
 // all of our routes will be prefixed with /api
 app.use('/api', router);
 //We wanna display a HomePage of our application, so we grant access to the assets, otherwise only the html will be accepted
-app.use(express.static(__dirname+'/basic_html'));
+app.use(express.static(__dirname+'/front_end_servings'));
 app.get('/', function(req, res) {
 	//we then define what file to serve at what adress.
-    res.sendFile(path.join(__dirname + '/basic_html/index.html'));
+    res.sendFile(path.join(__dirname + '/front_end_servings/index.html'));
 });
 
 
