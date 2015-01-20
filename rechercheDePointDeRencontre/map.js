@@ -29,14 +29,15 @@ function Map(){
 	this.loadMap = function( data ){
 		
 		for(var i=0 ; i<data.map.points.length ; i++){
-			
-			this.db.insert( { type:"point" , data: data.map.points[i] } )
+			data.map.points[i].lng = eval( data.map.points[i].lng );
+			data.map.points[i].lat = eval( data.map.points[i].lat );
+			this.db.insert( { type:"point" , data: data.map.points[i] } );
 			
 		}
 		
 		for(var i=0 ; i<data.map.edges.length ; i++){
-			
-			this.db.insert( { type:"edge" , data: data.map.edges[i] } )
+			data.map.edges[i].time.t = eval(data.map.edges[i].time.t);
+			this.db.insert( { type:"edge" , data: data.map.edges[i] } );
 			
 		}
 			
