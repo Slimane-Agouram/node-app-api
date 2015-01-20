@@ -401,32 +401,18 @@ router.route('/users/:user_id')
 
 	//this request is used to validate login, it will be used by the client app so as to perform authentification.
 	.post(function(req,res){
-		MyUser.find({email: req.params.user_id}, function(err,user){ //we look for the required email in our database 
+		if(req.body.password!=null && req.body.password!=undefined){
+				var password = new Buffer(req.body.password,'base64');
+				password = password.toString();
+				MyUser.find({email: req.params.user_id,password:password}, function(err,user){ //we look for the required email in our database 
 				if (err) {
 					res.json(err);
 				};
 
 
-				if(user.length>0) //we found something here
+				if(user.length>0  ) //we found something here
 				{
-					var password = new Buffer(req.body.password,'base64');
-					password = password.toString();
-					var index = -1;
-					for (var i = user.length - 1; i >= 0; i--) { //check password hash validity
-
-						if (user[i].password!=NaN && user[i].password!=null && user[i].password!=undefined  && user[i].password == password) {
-									index = i;
-									break;
-						}
-					};
-					if (index>=0) {//send adequate response to the client
-						res.json(200,{message:'Successfully logged in'});
-					}else//send adequate response to the client if error in credentials
-					{
-						res.json(401,'error in credentials');
-
-					}
-
+					res.json('200', "Login successfull");
 					
 				}
 				else//given credentials does not exist (specifically: email does not exist in our DB)
@@ -434,6 +420,12 @@ router.route('/users/:user_id')
 					res.json(403,'No User found with these credentials.');
 				}
 			});
+		}
+		else
+		{
+			res.json('401','incomplete query');
+		}
+
 
 	});
 
