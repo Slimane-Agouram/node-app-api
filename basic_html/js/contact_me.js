@@ -18,10 +18,12 @@ $(function() {
                 firstName = name.split(' ').slice(0, -1).join(' ');
             }
 
-            console.log("current url: " + document.URL);
             var url = (document.URL).replace('#contact','');
             url = url.replace('#about','');
             url = url.replace('#services','');
+            url = url.replace('#page-top','');
+            console.log("current url: " + document.URL);
+
 
              var object_to_send = {
             message:message,
