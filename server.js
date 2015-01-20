@@ -855,8 +855,7 @@ router.route('/meetingpoint')
 //////////////////////////////ROUTE FOR WEBSITE CONTACT///////////////////////////////
 router.route('/contactus')
 	.post(function(req,res){
-		console.log("contact us requested");
-		console.log("requeste : %j",req.body);
+		
 		var message = req.body.message;
 		var email = req.body.email;
 		var name = req.body.name;
@@ -875,7 +874,6 @@ router.route('/contactus')
 			}
 		}];
 
-		console.log("recieved : %j", object_to_send);
 		var template =credentials.nodemailer_templates.contact_template;  //we call the template of the mail
 		var subject = credentials.email_subjects.contact_subject;//sêcify subject
 		var fromWho = credentials.email_senders.contact_sender;//specify sender

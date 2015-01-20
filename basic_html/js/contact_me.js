@@ -18,6 +18,8 @@ $(function() {
                 firstName = name.split(' ').slice(0, -1).join(' ');
             }
 
+            console.log("current url: " + document.URL);
+
              var object_to_send = {
             message:message,
             phone:phone,
