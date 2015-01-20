@@ -2,6 +2,7 @@ var path           = require('path')
   , templatesDir   = path.resolve(__dirname, '.', 'templates')
   , emailTemplates = require('email-templates')
   , nodemailer     = require('nodemailer');
+  var myData = require("./data.json");
 
 
 exports.sendMails=function SendMails(users,template_required,subject,fromWho)
@@ -17,12 +18,11 @@ emailTemplates(templatesDir, function(err, template) {
     // ## Send a batch of emails and only load the template once
 
     // Prepare nodemailer transport object
-    console.log("preparing shit, templatesDir:" + templatesDir);
     var transportBatch = nodemailer.createTransport("SMTP", {
       service: "Gmail",
       auth: {
-        user: "test.dev.slimane@gmail.com",
-        pass: "DeveloperForTheWin"
+        user: myData.nodemailer.email,
+        pass: myData.nodemailer.password
       }
     });
 
