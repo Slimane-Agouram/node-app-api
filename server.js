@@ -86,7 +86,7 @@ router.get('/', function(req, res) {
 					initializeMap(map);
 					mpf.maps = loadMap(mapStrasbourg);
 					mpf.maps.STRASBOURG.loadMap(mapStrasbourg);
-					var res = mpf.findMeetPointFor(usersArray,1,'STRASBOURG',false);//call calculation routines
+					var res = mpf.findMeetPointFor(usersArray,1,'STRASBOURG',true);//call calculation routines
 					return res;
 	}
 
