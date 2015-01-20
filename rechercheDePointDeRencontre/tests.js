@@ -85,8 +85,7 @@ function loadMap(map_JSON){
 
 
 
-	//console.log( "nb edges : " + JSON.stringify(mpf.maps.STRASBOURG.db({type:"edge"}).count(),null,4) );
-	//console.log( "nb points : " + JSON.stringify(mpf.maps.STRASBOURG.db({type:"point"}).count(),null,4) );
+	
 	return mpf.maps;
 
 };

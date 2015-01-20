@@ -155,12 +155,12 @@ function Map(){
 
 		//the first step is wallked
 		this.db( { "type":"point" } ).each( function(node){
-
-			Vo[ node.id ] = GEO.computeDistance(node.data.lat , node.data.lng , User.lat , User.lng);
-			Vo[ node.id ] *= STANDART_DEVIATION / WALK_SPEED_MperS ;
+			//console.log("distance : "+GEO.computeDistance(node.data.lat , node.data.lng , User.lat , User.lng));
+			Vo[ node.data.id ] = GEO.computeDistance(node.data.lat , node.data.lng , User.lat , User.lng);
+			Vo[ node.data.id ] *= STANDART_DEVIATION / WALK_SPEED_MperS ;
 
 		} );
-
+		
 		//the other steps uses transports
 		for( var step = 1 ; step < MAX_NB_STEP ; step ++ ){
 
@@ -172,12 +172,12 @@ function Map(){
 
 				if( (User.useTransports==true) ){
 
-					V[ edge.data.in ] = Math.min( Vo[ edge.data.out ] , Vo[ edge.data.in ] + edge.data.time.t );
+					V[ edge.data.out ] = Math.min( V[ edge.data.out ] , Vo[ edge.data.in ] + edge.data.time.t );
 
 				}
 				else if(  edge.data.time.type != 'transport' ){
 
-					V[ edge.data.in ] = Math.min( Vo[ edge.data.in ] , Vo[ edge.data.out ] + edge.data.time.t );
+					V[ edge.data.out ] = Math.min( V[ edge.data.out ] , Vo[ edge.data.in ] + edge.data.time.t );
 
 				}
 

@@ -17,7 +17,57 @@
 <body oncontextmenu="return false;" >
 	
 	<script src="./tests.js"></script>
-	<code id=result"></code>
+<script>
+
+initializeMap();
+
+var userArray = [
+
+
+	{
+		useTransports : true,
+		lat : 48.5,
+		lng : 7.7
+	},
+	{
+		useTransports : true,
+		lat : 48.6,
+		lng : 7.6
+	},
+	{
+		useTransports : true,
+		lat : 48.55,
+		lng : 7.65
+	}
+
+
+];
+
+$.getJSON( "STRASBOURG.json", function( data ) {
+	loadMap(data);
+}).then(
+	function() {
+		alert( "$.get succeeded" );
+		console.log( "nb edges : " + JSON.stringify(mpf.maps.STRASBOURG.db({type:"edge"}).count(),null,4) );
+		console.log( "nb points : " + JSON.stringify(mpf.maps.STRASBOURG.db({type:"point"}).count(),null,4) );
+
+		console.log( "solution naive : " + JSON.stringify(mpf.findMeetPointFor( userArray , 0 , "STRASBOURG" , false ),null,4 ) );
+		console.log( "solution ++ : " + JSON.stringify(mpf.findMeetPointFor( userArray , 0 , "STRASBOURG" , true ),null,4 ) );
+	}, function() {
+		alert( "$.get failed!" );
+		console.log( "nb edges : " + JSON.stringify(mpf.maps.STRASBOURG.db({type:"edge"}).count(),null,4) );
+		console.log( "nb points : " + JSON.stringify(mpf.maps.STRASBOURG.db({type:"point"}).count(),null,4) );
+	}
+);
+
+
+
+
+
+
+
+
+</script>
   
 </body>
 
