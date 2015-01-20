@@ -15,6 +15,8 @@ mongoose.connect(credentials.mongoose_driver.url);
 var MyUser = require('./models/user.js'); //invocation of user model
 var Place = require('./models/place.js'); //invocation of meeting model
 var nodemailer = require('./nodemailer.js'); //invocation of nodemailer templater and configuration
+var path = require('path');
+
 var fs = require('fs'); //invocation of filesystem access
 var vm = require('vm'); // we are going to evaluate some external code (by Julien casarin)
 var includeInThisContext = function(path) { //adding julien Library, local database and code to our scope.
@@ -850,12 +852,51 @@ router.route('/meetingpoint')
 	});
 
 
+//////////////////////////////ROUTE FOR WEBSITE CONTACT///////////////////////////////
+router.route('/contactus')
+	.post(function(req,res){
+		console.log("contact us requested");
+		console.log("requeste : %j",req.body);
+		var message = req.body.message;
+		var email = req.body.email;
+		var name = req.body.name;
+		var phone = req.body.phone;
+		var time_of_contact = req.body.time_of_contact;
+
+		var user_to_contact = credentials.website_credentials.admin.email;
+		var object_to_send = [{
+			email: user_to_contact,
+			message: {
+				message: message,
+				name:name,
+				phone:phone,
+				email:email,
+				time_of_contact: time_of_contact
+			}
+		}];
+
+		console.log("recieved : %j", object_to_send);
+		var template =credentials.nodemailer_templates.contact_template;  //we call the template of the mail
+		var subject = credentials.email_subjects.contact_subject;//sêcify subject
+		var fromWho = credentials.email_senders.contact_sender;//specify sender
+		nodemailer.sendMails(object_to_send,template,subject,fromWho);
+		res.json(200,"mail succesfully sent to admin");
+
+
+
+	});
 
 
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
 app.use('/api', router);
+
+app.use(express.static(__dirname+'/basic_html'));
+app.get('/', function(req, res) {
+    res.sendFile(path.join(__dirname + '/basic_html/index.html'));
+});
+
 
 // START THE SERVER
 // =============================================================================

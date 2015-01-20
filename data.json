@@ -9,16 +9,24 @@
 	"nodemailer_templates":{
 		"welcome_template": "welcome-email",
 		"signup_template" : "signup-email",
-		"change_template" : "change-info-mail"
+		"change_template" : "change-info-mail",
+		"contact_template": "contact-email"
 	},
 	"email_subjects" : {
 		"welcome_subject": "You have been invited to a new Meeting",
 		"signup_subject" : "Bienvenu sur notre APP",
-		"changing_subject": "Credentials restoring"
+		"changing_subject": "Credentials restoring",
+		"contact_subject": "Someone tried to contact Meet-Me"
 	},
 	"email_senders" : {
 		"welcome_sender": "Meeting-Me App",
 		"signup_sender":  "Meeting-Me App",
-		"changing_sender": "Meeting-Me configuration"
+		"changing_sender": "Meeting-Me configuration",
+		"contact_sender"  : "Meet-Me WebPage"
+	},
+	"website_credentials":{
+		"admin":{
+			"email":"slimane.agouram@outlook.com"
+		}
 	}
 }
