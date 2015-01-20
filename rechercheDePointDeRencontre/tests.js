@@ -40,40 +40,41 @@ function initializeMap(){
 
 
 ******************************************************************************/
-function loadMap(){
+function loadMap(map_JSON){
+		map = map_JSON;
 
-	map = {
-	    name:"Strasbourg",
-	    map:
-	    {
-		points:[
-		    {
-			id:"V0",
-			lat:48.58315,
-			lng:7.74788,
-			adr:"Strasbourg"
-		    },
-		     {
-			id:"V1",
-			lat:47.75084,
-			lng:7.33589,
-			adr:"Mulhouse"
-		    }
-		],
-		edges:[
-		    {
-			id:"E1",
-			in:"V1",
-			out:"V2",
-			time:
-			    {
-				type : "drive",
-				t : 4000
-			    }
-		    }
-		]
-	    }
-	};
+	// map = {
+	//     name:"Strasbourg",
+	//     map:
+	//     {
+	// 	points:[
+	// 	    {
+	// 		id:"V0",
+	// 		lat:48.58315,
+	// 		lng:7.74788,
+	// 		adr:"Strasbourg"
+	// 	    },
+	// 	     {
+	// 		id:"V1",
+	// 		lat:47.75084,
+	// 		lng:7.33589,
+	// 		adr:"Mulhouse"
+	// 	    }
+	// 	],
+	// 	edges:[
+	// 	    {
+	// 		id:"E1",
+	// 		in:"V1",
+	// 		out:"V2",
+	// 		time:
+	// 		    {
+	// 			type : "drive",
+	// 			t : 4000
+	// 		    }
+	// 	    }
+	// 	]
+	//     }
+	// };
 
 
 

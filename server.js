@@ -16,6 +16,7 @@ var MyUser = require('./models/user.js'); //invocation of user model
 var Place = require('./models/place.js'); //invocation of meeting model
 var nodemailer = require('./nodemailer.js'); //invocation of nodemailer templater and configuration
 var path = require('path');
+var mapStrasbourg = require('./rechercheDePointDeRencontre/STRASBOURG.json');
 
 var fs = require('fs'); //invocation of filesystem access
 var vm = require('vm'); // we are going to evaluate some external code (by Julien casarin)
@@ -82,9 +83,9 @@ router.get('/', function(req, res) {
 	function getPoint(usersArray,mpf)
 	{
 					mpf = new MeetPointFinder ();
-					initializeMap();
-					mpf.maps = loadMap();
-					mpf.maps.STRASBOURG.loadMap(map);
+					initializeMap(map);
+					mpf.maps = loadMap(mapStrasbourg);
+					mpf.maps.STRASBOURG.loadMap(mapStrasbourg);
 					var res = mpf.findMeetPointFor(usersArray,1,'STRASBOURG',true);//call calculation routines
 
 					return res;
@@ -795,21 +796,20 @@ router.route('/meetingpoint')
 					}
 					else //meeting found
 					{
-						var indexes = [];
+						console.log("found meeting by id : %j", meeting);
+						var array_people_coming = [];
 						for (var i = meeting.usersArray.length - 1; i >= 0; i--) { //since the calculation is only done for users who wanna join the meeting
 							//we have to reconstruct our data looking for only those users.
-							if (meeting.usersArray[i].state == 'N' || meeting.usersArray[i].state=='AT') { //if users refused the meeting, then omit them
-								indexes.push(i); //we put them in an array of splicing_indexes, that way at the end we gonna delete them
+							if (meeting.usersArray[i].state == "DK" || meeting.usersArray[i].state=="Y") {
+								array_people_coming.push(meeting.usersArray[i]);
 							};
 						};
-						for (var i = indexes.length - 1; i >= 0; i--) { //deletin them from the result -- ATTENTION: we do not save changes, elsewhere
-							//we would have an alterated version of our meeting in database with missing users. 
-							meeting.usersArray.splice(indexes[i],1);
-						};
-						var point_recoverd = getPoint(meeting.usersArray,mpf); //calling the calculation routine done by Julien Casarin
+						
+						console.log("array after splice : %j", array_people_coming);
+						var point_recoverd = getPoint(array_people_coming,mpf); //calling the calculation routine done by Julien Casarin
 						var new_format_for_meeting = {   //constructing the new format of response to be sent to the client, including the meeting point 
 							id:meeting._id,
-							users: meeting.usersArray,
+							users: array_people_coming,
 							point:point_recoverd
 						};
 						res.json(new_format_for_meeting); //send the list!
@@ -831,22 +831,27 @@ router.route('/meetingpoint')
 						var indexes = []; //perparing slicing indexes for the users that refused to come
 						var points = []; // preparing the array to host our points of meeting for each point
 						var new_array_to_return = []; //preparing the array for the new format of response sent to the client
+						var array_people_coming = [];
+						var new_meetings = [];
+
 
 									for (var i = meetings.length - 1; i >= 0; i--) {
 
 											for (var k = meetings[i].usersArray.length - 1; k >= 0; k--) { //register users who don't wanna come (AT :already there)
-												if (meetings[i].usersArray[k].state == 'N' || meetings[i].usersArray[k].state=='AT') {
-													indexes.push(k);
+												if (meetings[i].usersArray[k].state == 'Y' || meetings[i].usersArray[k].state=='DK') {
+													//indexes.push(k);
+													array_people_coming.push(meetings[i].usersArray[k]);
 												};
 											};
 
-											for (var j = indexes.length - 1; j >= 0; j--) { //delete them from our meetings using array of splice indexes
-												meetings[i].usersArray.splice(indexes[j],1);
-											};
-											indexes = []; //remember to initialze the indexes array at each delete, either way, indexes will be cumulated.
+											// for (var j = indexes.length - 1; j >= 0; j--) { //delete them from our meetings using array of splice indexes
+											// 	meetings[i].usersArray.splice(indexes[j],1);
+											// };
+											// indexes = []; //remember to initialze the indexes array at each delete, either way, indexes will be cumulated.
+											new_meetings.push(array_people_coming);
 
-										points.push(getPoint(meetings[i].usersArray,mpf)); //for each meeting of ours, calculate meeting point 
-
+										points.push(getPoint(array_people_coming,mpf)); //for each meeting of ours, calculate meeting point 
+												array_people_coming = [];
 
 
 									};
@@ -854,7 +859,7 @@ router.route('/meetingpoint')
 						for (var i = meetings.length - 1; i >= 0; i--) { //constructing response object with diffrenent fields.
 							var new_format_for_meeting = {
 							id:meetings[i]._id,
-							users: meetings[i].usersArray,
+							users: new_meetings[i],
 							point: points[i]
 						};
 						new_array_to_return.push(new_format_for_meeting);
