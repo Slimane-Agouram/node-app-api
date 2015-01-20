@@ -1,0 +1,9 @@
+{
+	"nodemailer": {
+		"email": "test.dev.slimane@gmail.com",
+		"password": "DeveloperForTheWin"
+	},
+	"mongoose_driver":{
+		"url": "mongodb://slimane.agouram:03081990@ds053380.mongolab.com:53380/serveur_rd"
+	}
+}

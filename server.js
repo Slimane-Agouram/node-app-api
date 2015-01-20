@@ -9,7 +9,9 @@ var express    = require('express'); 		// call express
 var app        = express(); 				// define our app using express
 var bodyParser = require('body-parser'); //calling our JSON parser to handle requests 
 var mongoose = require('mongoose'); //call our database driver
-mongoose.connect('mongodb://slimane.agouram:03081990@ds053380.mongolab.com:53380/serveur_rd'); //mongolab NoSQL database
+var credentials = require('./data.json'); //put all our credentials for database and SMTP in a specific file, for maximum security.
+//mongoose.connect('mongodb://slimane.agouram:03081990@ds053380.mongolab.com:53380/serveur_rd'); //mongolab NoSQL database
+mongoose.connect(credentials.mongoose_driver.url);
 var MyUser = require('./models/user.js'); //invocation of user model
 var Place = require('./models/place.js'); //invocation of meeting model
 var nodemailer = require('./nodemailer.js'); //invocation of nodemailer templater and configuration
@@ -823,4 +825,4 @@ app.use('/api', router);
 // START THE SERVER
 // =============================================================================
 app.listen(port);
-console.log('Magic happens on port ' + port);
+console.log('Meeting API runing on port: ' + port);
