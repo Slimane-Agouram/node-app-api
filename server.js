@@ -57,7 +57,6 @@ router.get('/', function(req, res) {
 } ;
 
 	function getUserName(email_to_search){
-		console.log("recherhce du nom et prenom : " + email_to_search);
 		MyUser.find({email:email_to_search}, function(err,user){
 			var result = {first: '', last: ''};
 			if (err)
@@ -83,11 +82,11 @@ router.get('/', function(req, res) {
 	function getPoint(usersArray,mpf)
 	{
 					mpf = new MeetPointFinder ();
+					//console.log("STRASBOURG.json: %j", mapStrasbourg);
 					initializeMap(map);
 					mpf.maps = loadMap(mapStrasbourg);
 					mpf.maps.STRASBOURG.loadMap(mapStrasbourg);
-					var res = mpf.findMeetPointFor(usersArray,1,'STRASBOURG',true);//call calculation routines
-
+					var res = mpf.findMeetPointFor(usersArray,1,'STRASBOURG',false);//call calculation routines
 					return res;
 	}
 
@@ -796,16 +795,14 @@ router.route('/meetingpoint')
 					}
 					else //meeting found
 					{
-						console.log("found meeting by id : %j", meeting);
 						var array_people_coming = [];
 						for (var i = meeting.usersArray.length - 1; i >= 0; i--) { //since the calculation is only done for users who wanna join the meeting
 							//we have to reconstruct our data looking for only those users.
-							if (meeting.usersArray[i].state == "DK" || meeting.usersArray[i].state=="Y") {
+							if (meeting.usersArray[i].state == 'DK' || meeting.usersArray[i].state=='Y' || meeting.usersArray[i].state=='AT') {
 								array_people_coming.push(meeting.usersArray[i]);
 							};
 						};
 						
-						console.log("array after splice : %j", array_people_coming);
 						var point_recoverd = getPoint(array_people_coming,mpf); //calling the calculation routine done by Julien Casarin
 						var new_format_for_meeting = {   //constructing the new format of response to be sent to the client, including the meeting point 
 							id:meeting._id,
@@ -828,32 +825,22 @@ router.route('/meetingpoint')
 					}
 					else //meetings found
 					{ 
-						var indexes = []; //perparing slicing indexes for the users that refused to come
 						var points = []; // preparing the array to host our points of meeting for each point
 						var new_array_to_return = []; //preparing the array for the new format of response sent to the client
-						var array_people_coming = [];
-						var new_meetings = [];
-
+						var array_people_coming = []; //reconstructing the array of users for each meeting
+						var new_meetings = []; //we must reconstruct the array for calculation, those who won't come will not be considered.
 
 									for (var i = meetings.length - 1; i >= 0; i--) {
 
 											for (var k = meetings[i].usersArray.length - 1; k >= 0; k--) { //register users who don't wanna come (AT :already there)
-												if (meetings[i].usersArray[k].state == 'Y' || meetings[i].usersArray[k].state=='DK') {
-													//indexes.push(k);
+												if (meetings[i].usersArray[k].state == 'Y' || meetings[i].usersArray[k].state=='DK' || meetings[i].usersArray[k].state=='DK') {
 													array_people_coming.push(meetings[i].usersArray[k]);
 												};
 											};
-
-											// for (var j = indexes.length - 1; j >= 0; j--) { //delete them from our meetings using array of splice indexes
-											// 	meetings[i].usersArray.splice(indexes[j],1);
-											// };
-											// indexes = []; //remember to initialze the indexes array at each delete, either way, indexes will be cumulated.
 											new_meetings.push(array_people_coming);
 
 										points.push(getPoint(array_people_coming,mpf)); //for each meeting of ours, calculate meeting point 
 												array_people_coming = [];
-
-
 									};
 
 						for (var i = meetings.length - 1; i >= 0; i--) { //constructing response object with diffrenent fields.
