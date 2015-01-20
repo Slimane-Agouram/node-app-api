@@ -111,9 +111,9 @@ var users_to_mail = [{
 nodemailer.sendMails(users_to_mail,template,subject,whoFrom);
 };
 
-//test_SMTP("welcome-email","test welcome", "test-welcome");
-//test_SMTP("signup-email","test welcome", "test-welcome");
-//test_SMTP("change-info-mail","test welcome", "test-welcome");
+//test_SMTP(credentials.nodemailer_templates.signup_template,credentials.email_subjects.signup_subject,credentials.email_senders.signup_sender );
+//test_SMTP(credentials.nodemailer_templates.welcome_template,credentials.email_subjects.welcome_subject, credentials.email_senders.welcome_sender);
+//test_SMTP(credentials.nodemailer_templates.change_template, credentials.email_subjects.changing_subject,credentials.email_senders.changing_subject);
 
 ////end///////////////////////
 
@@ -163,9 +163,9 @@ router.route('/users')
 				          			last: myUser.lastname.toUpperCase()},
 				        		}];
 							
-							var template ='signup-email'; 
-							var subject = 'bienvenue';
-							var fromWho = 'From the APP';
+							var template =credentials.nodemailer_templates.signup_template; 
+							var subject = credentials.email_subjects.signup_subject;
+							var fromWho = credentials.email_senders.signup_sender;
 							nodemailer.sendMails(users_to_mail,template,subject,fromWho);
 
 		});
@@ -338,9 +338,9 @@ router.route('/users/:user_id')
 				          			last: user[0].lastname.toUpperCase()},
 				        		}];
 							
-							var template ='change-info-mail'; 
-							var subject = 'changement de données utilisateur';
-							var fromWho = 'From the APP';
+							var template =credentials.nodemailer_templates.change_template; 
+							var subject = credentials.email_subjects.changing_subject;
+							var fromWho = credentials.email_senders.changing_sender;
 							nodemailer.sendMails(users_to_mail,template,subject,fromWho);
 
 
@@ -470,6 +470,7 @@ router.route('/rendezvous')
 										lng:req.body.user.lng,
 										mode:req.body.user.mode,
 										useTransports: req.body.user.useTransports,
+										state: req.body.user.state
 								};
 
 							meeting.usersArray.push(user_to_add);//push it to the found meeting's array
@@ -514,10 +515,10 @@ router.route('/rendezvous')
 				        				first: creator_first,
 				        				last: creator_last
 				        				}}];
-							
-							var template ='welcome-email'; //we call the template of the mail
-							var subject = 'You have been invited to a new meeting!'; //sêcify subject
-							var fromWho = 'Meeting-Me'; //specify sender
+							var template =credentials.nodemailer_templates.welcome_template;  //we call the template of the mail
+							var subject = credentials.email_subjects.welcome_subject;//sêcify subject
+							var fromWho = credentials.email_senders.welcome_sender;//specify sender
+
 							nodemailer.sendMails(users_to_mail,template,subject,fromWho); //call nodemailer routine to send mails
 
 							});
@@ -704,9 +705,17 @@ router.route('/rendezvous')
 								if (req.body.user.lng!= undefined && req.body.user.lng!= null) {
 									meeting.usersArray[i].lng = req.body.user.lng;
 								};
-								if (req.body.user.state!=undefined && req.body.user.state!=null) 
+								if (req.body.user.state!=undefined && req.body.user.state!=null){ 
 									meeting.usersArray[i].state = req.body.user.state;
+								};
+								if (req.body.user.mode!=undefined && req.body.user.mode!=null) {
+									meeting.usersArray[i].mode = req.body.user.mode;
+								};
+								if (req.body.user.useTransports!=undefined && req.body.user.useTransports!=null) {
+									meeting.usersArray[i].useTransports = req.body.user.useTransports;
+								};
 							};
+								
 						};
 
 						if (index==-1) { //the index is only used to know if the user existed, we could have omitted that, but then we wouldn't know if the user did not exist in that meeting

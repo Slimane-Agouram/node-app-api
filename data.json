@@ -5,5 +5,20 @@
 	},
 	"mongoose_driver":{
 		"url": "mongodb://slimane.agouram:03081990@ds053380.mongolab.com:53380/serveur_rd"
+	},
+	"nodemailer_templates":{
+		"welcome_template": "welcome-email",
+		"signup_template" : "signup-email",
+		"change_template" : "change-info-mail"
+	},
+	"email_subjects" : {
+		"welcome_subject": "You have been invited to a new Meeting",
+		"signup_subject" : "Bienvenu sur notre APP",
+		"changing_subject": "Credentials restoring"
+	},
+	"email_senders" : {
+		"welcome_sender": "Meeting-Me App",
+		"signup_sender":  "Meeting-Me App",
+		"changing_sender": "Meeting-Me configuration"
 	}
 }
