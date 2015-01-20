@@ -19,6 +19,9 @@ $(function() {
             }
 
             console.log("current url: " + document.URL);
+            var url = (document.URL).replace('#contact','');
+            url = url.replace('#about','');
+            url = url.replace('#services','');
 
              var object_to_send = {
             message:message,
@@ -28,7 +31,7 @@ $(function() {
             time: new Date()
             };
             $.ajax({
-                url: document.URL+"api/contactus",
+                url: url+"api/contactus",
                 type: "POST",
                 data:object_to_send,
                 cache: false,
