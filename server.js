@@ -428,6 +428,7 @@ router.route('/users/:user_id')
 
 	});
 
+
 ///////////////////////////////////////////Routes for the Meetings RendezVous/////////////////////////////////////////////////////
 //Create new meeting with new creatorEmail and new list of new mails of joining members
 router.route('/rendezvous')
@@ -749,15 +750,30 @@ router.route('/rendezvous')
 				});
 
 
-	})
+	});
 //strait forward get request to get all programmed meetings...
+router.route('/rendezvous/:email')
 .get(function(req, res) {
-		
-		Place.find(function(err, meetings) {
+		Place.find({"usersArray":
+		{
+			 $elemMatch: {
+                     email: req.params.email,
+                     state: { $in: ['Y','DK','AT'] }
+                }
+		}}
+
+
+	,function(err, meetings) {
 			if (err)
 				res.send(err);
+			if (meetings.length==0) {
+				res.json('404','no meetings have been found (or none accepted) by this user');
+			}
+			else
+			{
+				res.json(200,meetings);
 
-			res.json(200,meetings);
+			}
 		});
 	});
 
