@@ -121,7 +121,7 @@ function Map(){
 			if( value < bestValue || find == false ){
 
 				find = true;
-				best = value;
+				bestValue = value;
 				res = node.data;
 
 			}
@@ -214,7 +214,7 @@ function Map(){
 			if( value < bestValue || find == false ){
 
 				find = true;
-				best = value;
+				bestValue = value;
 				res = node.data;
 
 			}
