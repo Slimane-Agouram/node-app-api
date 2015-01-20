@@ -26,7 +26,7 @@ function MeetPointFinder (){
 	 */
 	this.findMeetPointFor = function( userArray , researchId , mapName , useIntelligentAlgorithme ){
 
-		console.log("length of userArrays: "+ userArray.length);
+
 
 		if( useIntelligentAlgorithme != undefined && useIntelligentAlgorithme == true ){
 			
@@ -46,7 +46,9 @@ function MeetPointFinder (){
 			 * use all computed vectors to choose the best meetpoint for the users
 			 *
 			 */
+			 					//console.log("this.maps[ mapName ].chooseBest( userArray ): %j", this.maps[ mapName ].chooseBest( userArray ));
 			return this.maps[ mapName ].chooseBest( userArray );
+
 
 		}
 
@@ -56,7 +58,10 @@ function MeetPointFinder (){
 		 * compute the best point for all users without any transports
 		 *
 		 */
+
+
 		return this.maps[ mapName ].naiveBestAdresse( userArray );
+
 
 	}
 
