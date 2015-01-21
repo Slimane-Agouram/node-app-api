@@ -839,9 +839,7 @@ router.route('/meetingpoint')
 													array_people_coming.push(meetings[i].usersArray[k]);
 												};
 											};
-											if (array.array_people_coming!=[]) {
-												new_meetings.push(array_people_coming);
-											};
+											new_meetings.push(array_people_coming);
 
 										points.push(getPoint(array_people_coming,mpf)); //for each meeting of ours, calculate meeting point 
 												array_people_coming = [];
@@ -853,7 +851,9 @@ router.route('/meetingpoint')
 							users: new_meetings[i],
 							point: points[i]
 						};
-						new_array_to_return.push(new_format_for_meeting);
+						if (new_format_for_meeting.users.length>0) {
+							new_array_to_return.push(new_format_for_meeting);
+						};
 						};
 						res.json(200,new_array_to_return); //sending result
 					}
