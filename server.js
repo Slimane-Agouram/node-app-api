@@ -803,23 +803,31 @@ router.route('/meetingpoint')
 							if ( meeting.usersArray[i].state=='Y' || meeting.usersArray[i].state=='AT') {
 								array_people_coming.push(meeting.usersArray[i]);
 							};
+							
 						};
-						
-						var point_recoverd = getPoint(array_people_coming,mpf); //calling the calculation routine done by Julien Casarin
-						var new_format_for_meeting = {   //constructing the new format of response to be sent to the client, including the meeting point 
+						if (array_people_coming.length>0) {
+							var point_recoverd = getPoint(array_people_coming,mpf); //calling the calculation routine done by Julien Casarin
+							var new_format_for_meeting = {   //constructing the new format of response to be sent to the client, including the meeting point 
 							id:meeting._id,
 							users: array_people_coming,
 							point:point_recoverd
 						};
-						if (new_format_for_meeting.users.length>0) {
 							res.json(new_format_for_meeting); //send the list!
-						}
-						else
-						{
-							var response={status:'false',err:'The ID given has no accepting members. Apaprently none are coming'};
+
+
+							}else{
+								var response={status:'false',err:'The ID given has no accepting members. Apaprently none are coming'};
 
 							res.json('401',response);
-						}
+							}
+						
+					
+						//if (new_format_for_meeting.users.length>0) {
+						//}
+						//else
+					//	{
+							
+						//}
 					}
 				});
 			}
@@ -836,6 +844,7 @@ router.route('/meetingpoint')
 					else //meetings found
 					{ 
 						var points = []; // preparing the array to host our points of meeting for each point
+						var ids=[];
 						var new_array_to_return = []; //preparing the array for the new format of response sent to the client
 						var array_people_coming = []; //reconstructing the array of users for each meeting
 						var new_meetings = []; //we must reconstruct the array for calculation, those who won't come will not be considered.
@@ -847,24 +856,26 @@ router.route('/meetingpoint')
 													array_people_coming.push(meetings[i].usersArray[k]);
 												};
 											};
-											new_meetings.push(array_people_coming);
+											if (array_people_coming.length>0) {
+													new_meetings.push(array_people_coming);
+													points.push(getPoint(array_people_coming,mpf)); //for each meeting of ours, calculate meeting point
+													ids.push(meetings[i]._id) 
+													array_people_coming = [];	
+											};
 
-										points.push(getPoint(array_people_coming,mpf)); //for each meeting of ours, calculate meeting point 
-												array_people_coming = [];
 									};
 
-						for (var i = meetings.length - 1; i >= 0; i--) { //constructing response object with diffrenent fields.
+						for (var i = new_meetings.length - 1; i >= 0 ; i--) { //constructing response object with diffrenent fields.
 							var new_format_for_meeting = {
-							id:meetings[i]._id,
+							id:ids[i],
 							users: new_meetings[i],
 							point: points[i]
 						};
-						if (new_format_for_meeting.users.length>0) {
 							new_array_to_return.push(new_format_for_meeting);
-						};
-						};
+						}	
+												};
 						res.json(200,new_array_to_return); //sending result
-					}
+					
 
 
 			});
