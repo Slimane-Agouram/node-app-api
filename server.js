@@ -839,7 +839,9 @@ router.route('/meetingpoint')
 													array_people_coming.push(meetings[i].usersArray[k]);
 												};
 											};
-											new_meetings.push(array_people_coming);
+											if (array.array_people_coming!=[]) {
+												new_meetings.push(array_people_coming);
+											};
 
 										points.push(getPoint(array_people_coming,mpf)); //for each meeting of ours, calculate meeting point 
 												array_people_coming = [];
