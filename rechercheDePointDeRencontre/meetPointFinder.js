@@ -59,7 +59,7 @@ function MeetPointFinder (){
 		 *
 		 */
 
-
+		 console.log("naive");
 		return this.maps[ mapName ].naiveBestAdresse( userArray );
 
 

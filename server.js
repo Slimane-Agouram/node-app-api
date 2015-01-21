@@ -78,6 +78,8 @@ router.get('/', function(req, res) {
 			};
 		});
 	};
+
+
 ///Function to call the JS Library routine and perform adequate calculation to finaly return the meeting point.
 	function getPoint(usersArray,mpf)
 	{
@@ -798,7 +800,7 @@ router.route('/meetingpoint')
 						var array_people_coming = [];
 						for (var i = meeting.usersArray.length - 1; i >= 0; i--) { //since the calculation is only done for users who wanna join the meeting
 							//we have to reconstruct our data looking for only those users.
-							if (meeting.usersArray[i].state == 'DK' || meeting.usersArray[i].state=='Y' || meeting.usersArray[i].state=='AT') {
+							if ( meeting.usersArray[i].state=='Y' || meeting.usersArray[i].state=='AT') {
 								array_people_coming.push(meeting.usersArray[i]);
 							};
 						};
@@ -833,7 +835,7 @@ router.route('/meetingpoint')
 									for (var i = meetings.length - 1; i >= 0; i--) {
 
 											for (var k = meetings[i].usersArray.length - 1; k >= 0; k--) { //register users who don't wanna come (AT :already there)
-												if (meetings[i].usersArray[k].state == 'Y' || meetings[i].usersArray[k].state=='DK' || meetings[i].usersArray[k].state=='DK') {
+												if (meetings[i].usersArray[k].state == 'Y' || meetings[i].usersArray[k].state=='AT') {
 													array_people_coming.push(meetings[i].usersArray[k]);
 												};
 											};
@@ -861,7 +863,7 @@ router.route('/meetingpoint')
 	});
 
 
-//////////////////////////////ROUTE FOR WEBSITE CONTACT///////////////////////////////
+//////////////////////////////////////////////////////ROUTE FOR WEBSITE CONTACT///////////////////////////////
 router.route('/contactus')
 	.post(function(req,res){
 		
