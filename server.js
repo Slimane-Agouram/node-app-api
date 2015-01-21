@@ -553,7 +553,7 @@ router.route('/rendezvous')
 				lng:req.body.user.lng,
 				mode:req.body.user.mode,
 				useTransports: req.body.user.useTransports,
-				state:"DK"
+				state:req.body.user.state
 			};
 			rendezVous.usersArray.push(user_creator); //push it to the array of users in  a new meeting
 
@@ -805,7 +805,7 @@ router.route('/meetingpoint')
 							};
 							
 						};
-						if (array_people_coming.length>0) {
+						//if (array_people_coming.length>0) {
 							var point_recoverd = getPoint(array_people_coming,mpf); //calling the calculation routine done by Julien Casarin
 							var new_format_for_meeting = {   //constructing the new format of response to be sent to the client, including the meeting point 
 							id:meeting._id,
@@ -815,11 +815,11 @@ router.route('/meetingpoint')
 							res.json(new_format_for_meeting); //send the list!
 
 
-							}else{
-								var response={status:'false',err:'The ID given has no accepting members. Apaprently none are coming'};
+						//	}else{
+						//		var response={status:'false',err:'The ID given has no accepting members. Apaprently none are coming'};
 
-							res.json('401',response);
-							}
+						//	res.json('401',response);
+						//	}
 						
 					
 						//if (new_format_for_meeting.users.length>0) {
