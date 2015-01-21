@@ -811,7 +811,15 @@ router.route('/meetingpoint')
 							users: array_people_coming,
 							point:point_recoverd
 						};
-						res.json(new_format_for_meeting); //send the list!
+						if (new_format_for_meeting.users.length>0) {
+							res.json(new_format_for_meeting); //send the list!
+						}
+						else
+						{
+							var response={status:'false',err:'The ID given has no accepting members. Apaprently none are coming'};
+
+							res.json('401',response);
+						}
 					}
 				});
 			}
